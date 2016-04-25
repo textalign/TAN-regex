@@ -4,7 +4,7 @@
     xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="xs" version="2.0">
 
     <xsl:output method="xml"/>
-    <xsl:include href="../../SERVER/release/1/dev/functions/TAN-core-functions.xsl"/>
+    <xsl:include href="../../TAN-core-functions.xsl"/>
 
     <xsl:variable name="this-doc" select="."/>
     <xsl:template match="/*">
