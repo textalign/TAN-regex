@@ -6,10 +6,11 @@
     version="2.0">
     <!-- This template converts the Unicode database to a version that makes
     it easy to search for parts of the character names -->
+    <xsl:variable name="ucd-data" select="document('ucd.nounihan.grouped.xml')"/>
     <xsl:template match="/">
         <xsl:document>
             <ucd>
-                <xsl:for-each select="//ucd:char[@na1 or @na]">
+                <xsl:for-each select="$ucd-data//ucd:char[@na1 or @na]">
                     <char cp="{@cp}">
                         <xsl:for-each select="distinct-values(for $i in (@na1, @na, ucd:name-alias/@alias)
                             return tokenize(lower-case($i),'\s+'))">
