@@ -48,6 +48,96 @@
         <xsl:copy-of select="tokenize($input, tan:regex($pattern), $flags)"/>
     </xsl:function>
 
+    <xsl:function name="tan:get-ucd-decomp">
+        <xsl:copy-of select="doc('ucd/string-base-translate.xml')"/>
+    </xsl:function>
+    <xsl:function name="tan:string-base" as="xs:string?">
+        <!-- This function takes any string and replaces every character with its base Unicode character.
+      E.g., ἀνθρὠπους - > ανθρωπουσ
+      This is useful for preparing text to be searched without respect to accents
+      -->
+        <xsl:param name="arg" as="xs:string?"/>
+        <xsl:variable name="ucd-decomp" select="tan:get-ucd-decomp()"/>
+        <xsl:value-of
+            select="translate($arg, $ucd-decomp/tan:translate/tan:mapString, $ucd-decomp/tan:translate/tan:transString)"
+        />
+    </xsl:function>
+    <xsl:function name="tan:string-composite" as="xs:string?">
+        <!-- This function is the inverse of tan:string-base, in that it replaces every character with
+         those Unicode characters that use it as a base. If none exist, then the character itself is 
+         returned.
+         E.g., 'Max' - > 'MᴹḾṀṂℳⅯⓂ㎆㎒㎫㎹㎿㏁Ｍ𝐌𝑀𝑴𝓜𝔐𝕄𝕸𝖬𝗠𝘔𝙈𝙼🄼🅋🅪🅫aªàáâãäåāăąǎǟǡǻȁȃȧᵃḁẚạảấầẩẫậắằẳẵặₐ℀℁ⓐ㏂ａ𝐚𝑎𝒂𝒶𝓪𝔞𝕒𝖆𝖺𝗮𝘢𝙖𝚊xˣẋẍₓⅹⅺⅻⓧｘ𝐱𝑥𝒙𝓍𝔁𝔵𝕩𝖝𝗑𝘅𝘹𝙭𝚡'
+         This is useful for preparing regex character classes to broaden a search. 
+      -->
+        <xsl:param name="arg" as="xs:string?"/>
+        <xsl:variable name="ucd-decomp" select="tan:get-ucd-decomp()"/>
+        <xsl:variable name="output" as="xs:string*">
+            <xsl:analyze-string select="$arg" regex=".">
+                <xsl:matching-substring>
+                    <xsl:variable name="char" select="."/>
+                    <xsl:variable name="reverse-translate-match"
+                        select="$ucd-decomp/tan:translate/tan:reverse/tan:transString[text() = $char]"/>
+                    <xsl:value-of
+                        select="
+                            if (exists($reverse-translate-match)) then
+                                concat($char, string-join($reverse-translate-match/tan:mapString, ''))
+                            else
+                                $char"
+                    />
+                </xsl:matching-substring>
+            </xsl:analyze-string>
+        </xsl:variable>
+        <xsl:value-of select="string-join($output, '')"/>
+    </xsl:function>
+
+    <xsl:function name="tan:expand-search" as="xs:string?">
+        <!-- This function takes a string representation of a regular expression pattern and replaces every unescaped
+      character with a character class that lists all Unicode characters that would recursively decompose to that base
+      character.
+      E.g., 'word' - > '[wŵʷẁẃẅẇẉẘⓦｗ𝐰𝑤𝒘𝓌𝔀𝔴𝕨𝖜𝗐𝘄𝘸𝙬𝚠][oºòóôõöōŏőơǒǫǭȍȏȫȭȯȱᵒṍṏṑṓọỏốồổỗộớờởỡợₒℴⓞ㍵ｏ𝐨𝑜𝒐𝓸𝔬𝕠𝖔𝗈𝗼𝘰𝙤𝚘][rŕŗřȑȓʳᵣṙṛṝṟⓡ㎭㎮㎯ｒ𝐫𝑟𝒓𝓇𝓻𝔯𝕣𝖗𝗋𝗿𝘳𝙧𝚛][dďǆǳᵈḋḍḏḑḓⅆⅾⓓ㍲㍷㍸㍹㎗㏈ｄ𝐝𝑑𝒅𝒹𝓭𝔡𝕕𝖉𝖽𝗱𝘥𝙙𝚍]' 
+      This function is useful for cases where it is more efficient to change the search term rather than to transform
+      the text to be searched into base characters.
+      -->
+        <xsl:param name="regex" as="xs:string?"/>
+        <xsl:variable name="ucd-decomp" select="tan:get-ucd-decomp()"/>
+        <xsl:variable name="curl-l" select="'{'"/>
+        <xsl:variable name="curl-r" select="'}'"/>
+        <xsl:variable name="regex-1st-level" select="'\\[pPk](\{[^\}]*\})?'" as="xs:string"/>
+        <xsl:variable name="regex-2nd-level" select="'\\.|'" as="xs:string"/>
+        <xsl:variable name="output-prep-1">
+            <xsl:analyze-string select="$regex" regex="{$regex-1st-level}">
+                <xsl:matching-substring>
+                    <non-match>
+                        <xsl:value-of select="."/>
+                    </non-match>
+                </xsl:matching-substring>
+                <xsl:non-matching-substring>
+                    <xsl:analyze-string select="."
+                        regex="{concat($regex-2nd-level,$regex-escaping-characters)}">
+                        <xsl:matching-substring>
+                            <non-match>
+                                <xsl:value-of select="."/>
+                            </non-match>
+                        </xsl:matching-substring>
+                        <xsl:non-matching-substring>
+                            <xsl:analyze-string select="." regex=".">
+                                <xsl:matching-substring>
+                                    <match>
+                                        <xsl:value-of select="tan:string-composite(.)"/>
+                                    </match>
+                                </xsl:matching-substring>
+                            </xsl:analyze-string>
+                        </xsl:non-matching-substring>
+                    </xsl:analyze-string>
+                </xsl:non-matching-substring>
+            </xsl:analyze-string>
+        </xsl:variable>
+        <xsl:variable name="output" as="xs:string*">
+            <xsl:apply-templates select="$output-prep-1" mode="add-square-brackets"/>
+        </xsl:variable>
+        <xsl:value-of select="string-join($output, '')"/>
+    </xsl:function>
+
     <xsl:function name="tan:regex" as="xs:string?">
         <!-- Input: string of a regex search
         Output: the same string, with TAN-reserved escape sequences replaced by characters class sequences
@@ -112,12 +202,17 @@
                 <xsl:variable name="pass-1" as="xs:integer*">
                     <xsl:analyze-string select="$val-inside-braces" regex="\s*,\s*">
                         <xsl:non-matching-substring>
-                            <xsl:variable name="range" select="tokenize(.,'\s*-\s*')"/>
+                            <xsl:variable name="range" select="tokenize(., '\s*-\s*')"/>
                             <xsl:variable name="start" select="$range[1]"/>
                             <xsl:variable name="end" select="$range[2]"/>
                             <xsl:choose>
                                 <xsl:when test="exists($end)">
-                                    <xsl:copy-of select="for $i in (tan:hex-to-dec($start) to tan:hex-to-dec($end)) return $i"/>
+                                    <xsl:copy-of
+                                        select="
+                                            for $i in (tan:hex-to-dec($start) to tan:hex-to-dec($end))
+                                            return
+                                                $i"
+                                    />
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <xsl:copy-of select="tan:hex-to-dec($start)"/>
@@ -127,9 +222,6 @@
                     </xsl:analyze-string>
                 </xsl:variable>
                 <xsl:value-of select="codepoints-to-string($pass-1[. gt 1])"/>
-                <!--<xsl:analyze-string select="$val-inside-braces" regex="\s*,\s*">
-                    <xsl:non-matching-substring>hi</xsl:non-matching-substring>
-                </xsl:analyze-string>-->
             </xsl:when>
             <xsl:when
                 test="matches($val-inside-braces, concat('^(', $sep-class, $ucd-name-class, '+)+$'))">
