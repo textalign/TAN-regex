@@ -4,7 +4,7 @@
     xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:tei="http://www.tei-c.org/ns/1.0"
     xmlns:math="http://www.w3.org/2005/xpath-functions/math" xmlns:functx="http://www.functx.com"
     xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-    exclude-result-prefixes="xs math xd tan fn tei functx" version="3.0">
+    exclude-result-prefixes="#all" version="2.0">
 
     <xsl:function name="tan:matches" as="xs:boolean">
         <!-- two-param function of the three-param version below -->
@@ -257,7 +257,12 @@
         </xsl:choose>
     </xsl:function>
 
-    <xsl:mode name="add-square-brackets" on-no-match="shallow-copy"/>
+    <xsl:template match="node()" mode="add-square-brackets">
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:apply-templates mode="#current"/>
+        </xsl:copy>
+    </xsl:template>
     <xsl:template match="tan:match" name="prep-regex-char-class" mode="add-square-brackets">
         <xsl:variable name="preceding-text" as="xs:string?"
             select="string-join(preceding-sibling::tan:non-match/text(), '')"/>
