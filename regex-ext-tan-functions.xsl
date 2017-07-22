@@ -6,6 +6,9 @@
     
     exclude-result-prefixes="#all" version="2.0">
 
+    <xsl:variable name="regex-escaping-characters" as="xs:string"
+        select="'[\.\[\]\\\|\-\^\$\?\*\+\{\}\(\)]'"/>
+
     <xsl:function name="tan:matches" as="xs:boolean">
         <!-- two-param function of the three-param version below -->
         <xsl:param name="input" as="xs:string?"/>
@@ -148,32 +151,36 @@
         This function grabs entire classes of Unicode characters either by their codepoint or by the parts of 
         their name. It performs specially upon the form \k{***VALUE***}, where ***VALUE*** is either (1) one or
         more hexadecimal numbers joined by commas and hyphens or (2) one or more words each one prepended by a
-        non-word character. In the first option, there will be returned every Unicode character that has been 
+        period or exclamation mark. In the first option, there will be returned every Unicode character that has been 
         picked, filling in ranges where indicated by the hyphen. In the second option, there will be returned 
-        every Unicode character that has all of those words in its official Unicode name, or alias.
+        every Unicode character that has all of those words in its official Unicode name, or alias or does not have words
+        that have been prepended by the exclamation mark.
         Other examples:
         
           Any word with an omega, even if not in any of the Greek blocks: '\k{.omega}' (useful if you
           wish to find nonstandard uses of the omega, especially in the symbol block)
-          
-          Any word with two successive omegas, no matter their accentuation or capitalizaton, or if they 
-          have an iota subscript: '\k{.greek.omega}{2}' (useful for looking up a Greek word where accentuation
-          changes depending upon context or inflection)
           
           Every Greek word that attracts an accent from an enclitic: 
           '[\k{.greek.oxia}\k{.greek.tonos}\k{.greek.perispomeni}]\w*[\k{.greek.tonos}\k{.greek.oxia}]'
         -->
         <xsl:param name="regex" as="xs:string?"/>
         <xsl:variable name="tan-regex" select="doc('ucd/ucd-names.xml')"/>
-        <xsl:variable name="esc-seq" select="'\\k\{([^\}]+)\}'"/>
-        <xsl:variable name="pass-1">
+        <xsl:variable name="esc-seq" select="'\\k\{?([^\}]*)\}?'"/>
+        <xsl:variable name="pass-1" as="element()*">
             <regex>
                 <xsl:analyze-string select="$regex" regex="{$esc-seq}">
                     <xsl:matching-substring>
-                        <match>
-                            <xsl:value-of
-                                select="tan:process-regex-escape-k(regex-group(1), $tan-regex)"/>
-                        </match>
+                        <xsl:choose>
+                            <xsl:when test="not(matches(.,'\{.+\}'))">
+                                <xsl:message select="'Malformed \k expression. Must be followed by matching braces.'"></xsl:message>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <match>
+                                    <xsl:value-of
+                                        select="tan:process-regex-escape-k(regex-group(1), $tan-regex)"/>
+                                </match>
+                            </xsl:otherwise>
+                        </xsl:choose>
                     </xsl:matching-substring>
                     <xsl:non-matching-substring>
                         <non-match>
@@ -186,9 +193,19 @@
         <xsl:variable name="pass-2">
             <xsl:apply-templates select="$pass-1" mode="add-square-brackets"/>
         </xsl:variable>
+        <!--<xsl:copy-of select="$regex"/>-->
+        <!--<xsl:copy-of select="$pass-1"/>-->
         <xsl:value-of select="$pass-2//text()"/>
     </xsl:function>
 
+    <xsl:function name="tan:codepoints-to-string" as="xs:string?">
+        <!-- Input: any number of integers -->
+        <!-- Output: the string value representation, but only if the integers represent valid characters in XML -->
+        <!-- Like fn:codepoints-to-string(), but filters out illegal XML characters -->
+        <xsl:param name="arg" as="xs:integer*"/>
+        <xsl:copy-of select="codepoints-to-string($arg[. = (9, 10, 13) or (. ge 32 and . le 65533)])"/>
+    </xsl:function>
+    
     <xsl:function name="tan:process-regex-escape-k" as="xs:string?">
         <xsl:param name="val-inside-braces" as="xs:string"/>
         <xsl:param name="unicode-db" as="document-node()"/>
@@ -221,7 +238,7 @@
                         </xsl:non-matching-substring>
                     </xsl:analyze-string>
                 </xsl:variable>
-                <xsl:value-of select="codepoints-to-string($pass-1[. gt 1])"/>
+                <xsl:value-of select="tan:codepoints-to-string($pass-1)"/>
             </xsl:when>
             <xsl:when
                 test="matches($val-inside-braces, concat('^(', $sep-class, $ucd-name-class, '+)+$'))">
@@ -248,12 +265,14 @@
                                 satisfies * = $j)]/@cp"/>
                 <xsl:value-of
                     select="
-                        codepoints-to-string(for $i in $pass-1
+                        tan:codepoints-to-string(for $i in $pass-1
                         return
                             tan:hex-to-dec($i))"
                 />
             </xsl:when>
-            <xsl:otherwise/>
+            <xsl:otherwise>
+                <xsl:message select="'Malformed \k{} expression. Expression in braces should be hex values or unicode name keywords prepended by . or !'" terminate="yes"/>
+            </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
 

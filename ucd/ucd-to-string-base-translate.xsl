@@ -2,11 +2,12 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:tan="tag:textalign.net,2015:ns" xmlns:u="http://www.unicode.org/ns/2003/ucd/1.0"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="xs" version="2.0">
-
+    <!-- Input: the XML form  of the Unicode database -->
+    <!-- Output: an XML file that optimizes the process of going to and from a base character and complex characters that depend upon them. -->
     <xsl:output method="xml"/>
     <xsl:include href="../../incl/TAN-core-functions.xsl"/>
 
-    <xsl:variable name="this-doc" select="."/>
+    <xsl:variable name="unicode-database" select="."/>
     <xsl:template match="/*">
         <tan:translate>
             <xsl:comment>
@@ -31,7 +32,7 @@
     
     <xsl:variable name="base-chars" as="element()">
         <tan:base-chars>
-            <xsl:for-each select="$this-doc/u:ucd/u:repertoire/u:group/u:char[not(@dm)][matches(@NFKC_CF,'^[\dA-F]+$')]">
+            <xsl:for-each select="$unicode-database/u:ucd/u:repertoire/u:group/u:char[not(@dm)][matches(@NFKC_CF,'^[\dA-F]+$')]">
                 <xsl:variable name="this-nfkc-cf-cp" select="@NFKC_CF"/>
                 <xsl:variable name="is-lc"
                     select="
@@ -40,7 +41,7 @@
                         else
                             false()"
                 />
-                <xsl:variable name="target-nfkc-cf" select="$this-doc/u:ucd/u:repertoire/u:group/u:char[@cp = $this-nfkc-cf-cp]"/>
+                <xsl:variable name="target-nfkc-cf" select="$unicode-database/u:ucd/u:repertoire/u:group/u:char[@cp = $this-nfkc-cf-cp]"/>
                 <xsl:variable name="target-nfkc-cf-is-lc"
                     select="
                         if ($target-nfkc-cf/@Lower = 'Y') then
@@ -57,7 +58,7 @@
                         base-val="{codepoints-to-string($target-codepoint-dec)}"/>
                 </xsl:if>                
             </xsl:for-each>
-            <xsl:for-each select="($this-doc/u:ucd/u:repertoire/u:group/u:char[@dm and not(starts-with(@dm,'0020 '))])">
+            <xsl:for-each select="($unicode-database/u:ucd/u:repertoire/u:group/u:char[@dm and not(starts-with(@dm,'0020 '))])">
                 <xsl:variable name="this-codepoint-dec" select="tan:hex-to-dec(@cp)"/>
                 <xsl:variable name="target-codepoint-dec" select="tan:hex-to-dec(tan:base-find(@dm))"/>
                 <xsl:if test="$target-codepoint-dec != 0">
@@ -75,10 +76,10 @@
         <xsl:variable name="first" select="tokenize($arg, ' ')[1]"/>
         <xsl:value-of
             select="
-                if (not($this-doc/u:ucd/u:repertoire/u:group/u:char[@cp = $first]/@dm)) then
+                if (not($unicode-database/u:ucd/u:repertoire/u:group/u:char[@cp = $first]/@dm)) then
                     $first
                 else
-                    tan:base-find($this-doc/u:ucd/u:repertoire/u:group/u:char[@cp = $first][1]/@dm)"
+                    tan:base-find($unicode-database/u:ucd/u:repertoire/u:group/u:char[@cp = $first][1]/@dm)"
         />
     </xsl:function>
 
