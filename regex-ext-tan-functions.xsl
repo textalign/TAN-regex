@@ -103,9 +103,7 @@
       -->
         <xsl:param name="regex" as="xs:string?"/>
         <xsl:variable name="ucd-decomp" select="tan:get-ucd-decomp()"/>
-        <xsl:variable name="curl-l" select="'{'"/>
-        <xsl:variable name="curl-r" select="'}'"/>
-        <xsl:variable name="regex-1st-level" select="'\\[pPk](\{[^\}]*\})?'" as="xs:string"/>
+        <xsl:variable name="regex-1st-level" select="'\\[pPu](\{[^\}]*\})?'" as="xs:string"/>
         <xsl:variable name="regex-2nd-level" select="'\\.|'" as="xs:string"/>
         <xsl:variable name="output-prep-1">
             <xsl:analyze-string select="$regex" regex="{$regex-1st-level}">
@@ -142,14 +140,14 @@
     </xsl:function>
 
     <xsl:function name="tan:regex" as="xs:string?">
-        <!-- Input: string of a regex search
-        Output: the same string, with TAN-reserved escape sequences replaced by characters class sequences
-        E.g., '\k{.greek.capital.perispomeni}' - - > '[ἎἏἮἯἾἿὟὮὯᾎᾏᾞᾟᾮᾯ]'
-        \k{.latin.cedilla} - - > '[ÇçĢģĶķĻļŅņŖŗŞşŢţȨȩᷗḈḉḐḑḜḝḨḩ]'
-        'angle \k{4d-4f, 51}' - - > 'angle [MNOQ]'
+        <!-- Input: string representing a regex pattern -->
+        <!-- Output: the same string, with TAN-reserved escape sequences replaced by characters class sequences
+        E.g., '\u{.greek.capital.perispomeni}' - - > '[ἎἏἮἯἾἿὟὮὯᾎᾏᾞᾟᾮᾯ]'
+        {.latin.cedilla} - - > '[ÇçĢģĶķĻļŅņŖŗŞşŢţȨȩᷗḈḉḐḑḜḝḨḩ]'
+        'angle {4d-4f, 51}' - - > 'angle [MNOQ]'
         
         This function grabs entire classes of Unicode characters either by their codepoint or by the parts of 
-        their name. It performs specially upon the form \k{***VALUE***}, where ***VALUE*** is either (1) one or
+        their name. It performs specially upon the form {[VALUE]}, where [VALUE] is either (1) one or
         more hexadecimal numbers joined by commas and hyphens or (2) one or more words each one prepended by a
         period or exclamation mark. In the first option, there will be returned every Unicode character that has been 
         picked, filling in ranges where indicated by the hyphen. In the second option, there will be returned 
@@ -157,27 +155,27 @@
         that have been prepended by the exclamation mark.
         Other examples:
         
-          Any word with an omega, even if not in any of the Greek blocks: '\k{.omega}' (useful if you
+          Any word with an omega, even if not in any of the Greek blocks: '{.omega}' (useful if you
           wish to find nonstandard uses of the omega, especially in the symbol block)
           
           Every Greek word that attracts an accent from an enclitic: 
-          '[\k{.greek.oxia}\k{.greek.tonos}\k{.greek.perispomeni}]\w*[\k{.greek.tonos}\k{.greek.oxia}]'
+          '[{.greek.oxia}{.greek.tonos}{.greek.perispomeni}]\w*[{.greek.tonos}{.greek.oxia}]'
         -->
         <xsl:param name="regex" as="xs:string?"/>
         <xsl:variable name="tan-regex" select="doc('ucd/ucd-names.xml')"/>
-        <xsl:variable name="esc-seq" select="'\\k\{?([^\}]*)\}?'"/>
+        <xsl:variable name="esc-seq" select="'\\u\{?([^\}]*)\}?'"/>
         <xsl:variable name="pass-1" as="element()*">
             <regex>
                 <xsl:analyze-string select="$regex" regex="{$esc-seq}">
                     <xsl:matching-substring>
                         <xsl:choose>
                             <xsl:when test="not(matches(.,'\{.+\}'))">
-                                <xsl:message select="'Malformed \k expression. Must be followed by matching braces.'"></xsl:message>
+                                <xsl:message select="'Malformed \u expression. Must be followed by matching braces.'"></xsl:message>
                             </xsl:when>
                             <xsl:otherwise>
                                 <match>
                                     <xsl:value-of
-                                        select="tan:process-regex-escape-k(regex-group(1), $tan-regex)"/>
+                                        select="tan:process-regex-escape-u(regex-group(1), $tan-regex)"/>
                                 </match>
                             </xsl:otherwise>
                         </xsl:choose>
@@ -206,12 +204,12 @@
         <xsl:copy-of select="codepoints-to-string($arg[. = (9, 10, 13) or (. ge 32 and . le 65533)])"/>
     </xsl:function>
     
-    <xsl:function name="tan:process-regex-escape-k" as="xs:string?">
+    <xsl:function name="tan:process-regex-escape-u" as="xs:string?">
         <xsl:param name="val-inside-braces" as="xs:string"/>
         <xsl:param name="unicode-db" as="document-node()"/>
         <!-- characters used in the official character names -->
         <xsl:variable name="ucd-name-class" select="'[-#\(\)a-zA-Z0-9]'"/>
-        <!-- characters allowed to separate items in a \k{} escape class -->
+        <!-- characters allowed to separate items in a {} escape class -->
         <xsl:variable name="sep-class" select="'[^-#\)\(\w]'"/>
         <xsl:choose>
             <xsl:when
@@ -271,7 +269,7 @@
                 />
             </xsl:when>
             <xsl:otherwise>
-                <xsl:message select="'Malformed \k{} expression. Expression in braces should be hex values or unicode name keywords prepended by . or !'" terminate="yes"/>
+                <xsl:message select="'Malformed {} expression. Expression in braces should be hex values or unicode name keywords prepended by . or !'" terminate="yes"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
@@ -376,7 +374,6 @@
             </xsl:analyze-string>
         </xsl:variable>
         <xsl:variable name="split-rev" select="reverse($split)"/>
-        <!--<xsl:copy-of select="$split"/>-->
         <xsl:copy-of
             select="
                 sum(for $i in (1 to count($split))
