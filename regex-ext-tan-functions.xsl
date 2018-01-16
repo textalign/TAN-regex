@@ -1,13 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns="tag:textalign.net,2015:ns" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tan="tag:textalign.net,2015:ns"
+    xmlns:tan-regex="tag:textalign.net,2015:regex:ns"
     xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:tei="http://www.tei-c.org/ns/1.0"
     xmlns:math="http://www.w3.org/2005/xpath-functions/math" xmlns:functx="http://www.functx.com"
-    
     exclude-result-prefixes="#all" version="2.0">
 
-    <xsl:variable name="regex-escaping-characters" as="xs:string"
-        select="'[\.\[\]\\\|\-\^\$\?\*\+\{\}\(\)]'"/>
+    <xsl:variable name="esc-seq" select="'\\u\{?([^\}]*)\}?'"/>
+    <xsl:variable name="unicode-db" select="doc('ucd/ucd-names.xml')"/>
+
+    <!-- this is a regular expression pattern for characters in a string that should be prefaced with \ when converting to a regular expression -->
+    <xsl:variable name="characters-to-escape-when-converting-string-to-regex" as="xs:string"
+        select="'[\.\[\]\\\|\^\$\?\*\+\{\}\(\)]'"/>
+    <!-- this is a regular expression pattern to find specially escaped characters in a string that is a regular expression -->
+    <xsl:variable name="escapes-in-regex" as="xs:string"
+        select="'\\[\.\[\]\\\|\-\^\$\?\*\+\{\}\(\)nrt]|\\[pPu]\{[^\}]*\}'"/>
+    <!-- this is a regular expression pattern to find characters that designate groups in a regular expression -->
+    <xsl:variable name="grouping-characters-in-regex" select="'[\(\)\{\}\[\]]'"/>
+    
+    <xsl:function name="tan:escape" as="xs:string*">
+        <!-- Input: any sequence of strings -->
+        <!-- Output: each string prepared for regular expression searches, i.e., with reserved characters escaped out. -->
+        <xsl:param name="strings" as="xs:string*"/>
+        <xsl:copy-of
+            select="
+            for $i in $strings
+            return
+            replace($i, concat('(', $characters-to-escape-when-converting-string-to-regex, ')'), '\\$1')"
+        />
+    </xsl:function>
 
     <xsl:function name="tan:matches" as="xs:boolean">
         <!-- two-param function of the three-param version below -->
@@ -65,7 +86,9 @@
             select="translate($arg, $ucd-decomp/tan:translate/tan:mapString, $ucd-decomp/tan:translate/tan:transString)"
         />
     </xsl:function>
-    <xsl:function name="tan:string-composite" as="xs:string?">
+    <xsl:function name="tan:string-composite" as="xs:string*">
+        <!-- Input: a string -->
+        <!-- Output: one string per character in the input, with characters that use the input character as a base -->
         <!-- This function is the inverse of tan:string-base, in that it replaces every character with
          those Unicode characters that use it as a base. If none exist, then the character itself is 
          returned.
@@ -74,7 +97,6 @@
       -->
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:variable name="ucd-decomp" select="tan:get-ucd-decomp()"/>
-        <xsl:variable name="output" as="xs:string*">
             <xsl:analyze-string select="$arg" regex=".">
                 <xsl:matching-substring>
                     <xsl:variable name="char" select="."/>
@@ -89,111 +111,6 @@
                     />
                 </xsl:matching-substring>
             </xsl:analyze-string>
-        </xsl:variable>
-        <xsl:value-of select="string-join($output, '')"/>
-    </xsl:function>
-
-    <xsl:function name="tan:expand-search" as="xs:string?">
-        <!-- This function takes a string representation of a regular expression pattern and replaces every unescaped
-      character with a character class that lists all Unicode characters that would recursively decompose to that base
-      character.
-      E.g., 'word' - > '[wŵʷẁẃẅẇẉẘⓦｗ𝐰𝑤𝒘𝓌𝔀𝔴𝕨𝖜𝗐𝘄𝘸𝙬𝚠][oºòóôõöōŏőơǒǫǭȍȏȫȭȯȱᵒṍṏṑṓọỏốồổỗộớờởỡợₒℴⓞ㍵ｏ𝐨𝑜𝒐𝓸𝔬𝕠𝖔𝗈𝗼𝘰𝙤𝚘][rŕŗřȑȓʳᵣṙṛṝṟⓡ㎭㎮㎯ｒ𝐫𝑟𝒓𝓇𝓻𝔯𝕣𝖗𝗋𝗿𝘳𝙧𝚛][dďǆǳᵈḋḍḏḑḓⅆⅾⓓ㍲㍷㍸㍹㎗㏈ｄ𝐝𝑑𝒅𝒹𝓭𝔡𝕕𝖉𝖽𝗱𝘥𝙙𝚍]' 
-      This function is useful for cases where it is more efficient to change the search term rather than to transform
-      the text to be searched into base characters.
-      -->
-        <xsl:param name="regex" as="xs:string?"/>
-        <xsl:variable name="ucd-decomp" select="tan:get-ucd-decomp()"/>
-        <xsl:variable name="regex-1st-level" select="'\\[pPu](\{[^\}]*\})?'" as="xs:string"/>
-        <xsl:variable name="regex-2nd-level" select="'\\.|'" as="xs:string"/>
-        <xsl:variable name="output-prep-1">
-            <xsl:analyze-string select="$regex" regex="{$regex-1st-level}">
-                <xsl:matching-substring>
-                    <non-match>
-                        <xsl:value-of select="."/>
-                    </non-match>
-                </xsl:matching-substring>
-                <xsl:non-matching-substring>
-                    <xsl:analyze-string select="."
-                        regex="{concat($regex-2nd-level,$regex-escaping-characters)}">
-                        <xsl:matching-substring>
-                            <non-match>
-                                <xsl:value-of select="."/>
-                            </non-match>
-                        </xsl:matching-substring>
-                        <xsl:non-matching-substring>
-                            <xsl:analyze-string select="." regex=".">
-                                <xsl:matching-substring>
-                                    <match>
-                                        <xsl:value-of select="tan:string-composite(.)"/>
-                                    </match>
-                                </xsl:matching-substring>
-                            </xsl:analyze-string>
-                        </xsl:non-matching-substring>
-                    </xsl:analyze-string>
-                </xsl:non-matching-substring>
-            </xsl:analyze-string>
-        </xsl:variable>
-        <xsl:variable name="output" as="xs:string*">
-            <xsl:apply-templates select="$output-prep-1" mode="add-square-brackets"/>
-        </xsl:variable>
-        <xsl:value-of select="string-join($output, '')"/>
-    </xsl:function>
-
-    <xsl:function name="tan:regex" as="xs:string?">
-        <!-- Input: string representing a regex pattern -->
-        <!-- Output: the same string, with TAN-reserved escape sequences replaced by characters class sequences
-        E.g., '\u{.greek.capital.perispomeni}' - - > '[ἎἏἮἯἾἿὟὮὯᾎᾏᾞᾟᾮᾯ]'
-        {.latin.cedilla} - - > '[ÇçĢģĶķĻļŅņŖŗŞşŢţȨȩᷗḈḉḐḑḜḝḨḩ]'
-        'angle {4d-4f, 51}' - - > 'angle [MNOQ]'
-        
-        This function grabs entire classes of Unicode characters either by their codepoint or by the parts of 
-        their name. It performs specially upon the form {[VALUE]}, where [VALUE] is either (1) one or
-        more hexadecimal numbers joined by commas and hyphens or (2) one or more words each one prepended by a
-        period or exclamation mark. In the first option, there will be returned every Unicode character that has been 
-        picked, filling in ranges where indicated by the hyphen. In the second option, there will be returned 
-        every Unicode character that has all of those words in its official Unicode name, or alias or does not have words
-        that have been prepended by the exclamation mark.
-        Other examples:
-        
-          Any word with an omega, even if not in any of the Greek blocks: '{.omega}' (useful if you
-          wish to find nonstandard uses of the omega, especially in the symbol block)
-          
-          Every Greek word that attracts an accent from an enclitic: 
-          '[{.greek.oxia}{.greek.tonos}{.greek.perispomeni}]\w*[{.greek.tonos}{.greek.oxia}]'
-        -->
-        <xsl:param name="regex" as="xs:string?"/>
-        <xsl:variable name="tan-regex" select="doc('ucd/ucd-names.xml')"/>
-        <xsl:variable name="esc-seq" select="'\\u\{?([^\}]*)\}?'"/>
-        <xsl:variable name="pass-1" as="element()*">
-            <regex>
-                <xsl:analyze-string select="$regex" regex="{$esc-seq}">
-                    <xsl:matching-substring>
-                        <xsl:choose>
-                            <xsl:when test="not(matches(.,'\{.+\}'))">
-                                <xsl:message select="'Malformed \u expression. Must be followed by matching braces.'"></xsl:message>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <match>
-                                    <xsl:value-of
-                                        select="tan:process-regex-escape-u(regex-group(1), $tan-regex)"/>
-                                </match>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:matching-substring>
-                    <xsl:non-matching-substring>
-                        <non-match>
-                            <xsl:value-of select="."/>
-                        </non-match>
-                    </xsl:non-matching-substring>
-                </xsl:analyze-string>
-            </regex>
-        </xsl:variable>
-        <xsl:variable name="pass-2">
-            <xsl:apply-templates select="$pass-1" mode="add-square-brackets"/>
-        </xsl:variable>
-        <!--<xsl:copy-of select="$regex"/>-->
-        <!--<xsl:copy-of select="$pass-1"/>-->
-        <xsl:value-of select="$pass-2//text()"/>
     </xsl:function>
 
     <xsl:function name="tan:codepoints-to-string" as="xs:string?">
@@ -201,25 +118,41 @@
         <!-- Output: the string value representation, but only if the integers represent valid characters in XML -->
         <!-- Like fn:codepoints-to-string(), but filters out illegal XML characters -->
         <xsl:param name="arg" as="xs:integer*"/>
-        <xsl:copy-of select="codepoints-to-string($arg[. = (9, 10, 13) or (. ge 32 and . le 65533)])"/>
+        <xsl:copy-of
+            select="codepoints-to-string($arg[. = (9, 10, 13) or (. ge 32 and . le 65533)])"/>
     </xsl:function>
-    
+
     <xsl:function name="tan:process-regex-escape-u" as="xs:string?">
+        <!-- Input: a string that is inside the braces of a \u{} expression -->
+        <!-- Output: the expansion of the expression -->
+        <!-- Acceptable values of \u{}: -->
+        <!-- 'angle \u{4d-4f, 51}' - - > 'angle [MNOQ]' -->
+        <!-- 1. Individual hex values or ranges of them, separated by a comma or space. Values will be replaced with the corresponding Unicode characters -->
+        <!-- 2. Characters terminated by the question mark. Characters will be replaced by any Unicode character that has as a base the characters preceding the final question mark -->
+        <!-- E.g., \u{λ\u{ο?}γ\u{ο?}} - - > 'λ[οόὀὁὂὃὄὅὸό𝛐𝜊𝝄𝝾𝞸]γ[οόὀὁὂὃὄὅὸό𝛐𝜊𝝄𝝾𝞸]' -->
+        <!-- 3. Words chained by preceding periods or exclamation marks. The expression will by replaced by Unicode characters that have every .-prefaced word in their name, and no !-prefaced words in their name -->
+        <!-- E.g., '\u{.greek.capital.perispomeni}' - - > '[ἎἏἮἯἾἿὟὮὯᾎᾏᾞᾟᾮᾯ]'
+        \u{.latin.cedilla} - - > '[ÇçĢģĶķĻļŅņŖŗŞşŢţȨȩᷗḈḉḐḑḜḝḨḩ]'
+        \u{.m!small} - - > '[MƜൔᒻᒼᒾᒿᛗᛘᛙᣘᧄᮿᰮᴹḾṀṂℳⓂⱮㄇ㎛㎡㎥㎧㎨㏁㏞㏟ꚳꟽꟿꩌＭ]'  -->
+        
         <xsl:param name="val-inside-braces" as="xs:string"/>
-        <xsl:param name="unicode-db" as="document-node()"/>
         <!-- characters used in the official character names -->
         <xsl:variable name="ucd-name-class" select="'[-#\(\)a-zA-Z0-9]'"/>
-        <!-- characters allowed to separate items in a {} escape class -->
-        <xsl:variable name="sep-class" select="'[^-#\)\(\w]'"/>
-        <xsl:choose>
-            <xsl:when
-                test="matches($val-inside-braces, '^[0-9a-fA-F]{1,6}(\s*-\s*[0-9a-fA-F]{1,6})?(\s*,\s*[0-9a-fA-F]{1,6}(\s*-\s*[0-9a-fA-F]{1,6})?)*$')">
-                <xsl:variable name="pass-1" as="xs:integer*">
-                    <xsl:analyze-string select="$val-inside-braces" regex="\s*,\s*">
-                        <xsl:non-matching-substring>
-                            <xsl:variable name="range" select="tokenize(., '\s*-\s*')"/>
-                            <xsl:variable name="start" select="$range[1]"/>
-                            <xsl:variable name="end" select="$range[2]"/>
+        <!-- characters allowed to separate items in a {} escape class, so far restricted to . and ! -->
+        <xsl:variable name="sep-class" select="'[\.!]'"/>
+        <!-- first normalize spacing around the hyphen and comma, then tokenize on commas and spaces -->
+        <xsl:variable name="val-normalized"
+            select="replace(normalize-space($val-inside-braces), ' ?([-,]) ?', '$1')"/>
+        <xsl:variable name="val-parts" as="xs:string*" select="tokenize($val-normalized, ',| ')"/>
+        <xsl:variable name="val-parts-analyzed" as="xs:string*">
+            <xsl:for-each select="$val-parts">
+                <xsl:choose>
+                    <xsl:when test="matches(., '^[0-9a-fA-F]{1,6}(-[0-9a-fA-F]{1,6})?$')">
+                        <!-- it's a Unicode codepoint -->
+                        <xsl:variable name="range" select="tokenize(., '\s*-\s*')"/>
+                        <xsl:variable name="start" select="$range[1]"/>
+                        <xsl:variable name="end" select="$range[2]"/>
+                        <xsl:variable name="pass-1" as="xs:integer*">
                             <xsl:choose>
                                 <xsl:when test="exists($end)">
                                     <xsl:copy-of
@@ -233,45 +166,112 @@
                                     <xsl:copy-of select="tan:hex-to-dec($start)"/>
                                 </xsl:otherwise>
                             </xsl:choose>
-                        </xsl:non-matching-substring>
-                    </xsl:analyze-string>
-                </xsl:variable>
-                <xsl:value-of select="tan:codepoints-to-string($pass-1)"/>
-            </xsl:when>
-            <xsl:when
-                test="matches($val-inside-braces, concat('^(', $sep-class, $ucd-name-class, '+)+$'))">
-                <xsl:variable name="names-to-include" as="xs:string*">
-                    <xsl:analyze-string select="$val-inside-braces"
-                        regex="{concat(replace($sep-class,'\]','!]('),$ucd-name-class,'+)+')}">
-                        <xsl:matching-substring>
-                            <xsl:copy-of select="regex-group(1)"/>
-                        </xsl:matching-substring>
-                    </xsl:analyze-string>
-                </xsl:variable>
-                <xsl:variable name="names-to-exclude" as="xs:string*">
-                    <xsl:analyze-string select="$val-inside-braces"
-                        regex="{concat('!(',$ucd-name-class,'+)+')}">
-                        <xsl:matching-substring>
-                            <xsl:copy-of select="regex-group(1)"/>
-                        </xsl:matching-substring>
-                    </xsl:analyze-string>
-                </xsl:variable>
-                <xsl:variable name="pass-1"
-                    select="
-                        $unicode-db/*/*[every $i in $names-to-include
-                            satisfies * = $i and not(some $j in $names-to-exclude
-                                satisfies * = $j)]/@cp"/>
-                <xsl:value-of
-                    select="
-                        tan:codepoints-to-string(for $i in $pass-1
-                        return
-                            tan:hex-to-dec($i))"
-                />
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:message select="'Malformed {} expression. Expression in braces should be hex values or unicode name keywords prepended by . or !'" terminate="yes"/>
-            </xsl:otherwise>
-        </xsl:choose>
+                        </xsl:variable>
+                        <xsl:value-of select="tan:codepoints-to-string($pass-1)"/>
+                    </xsl:when>
+                    <xsl:when test="matches(., '^.+\?$')">
+                        <xsl:variable name="text-to-expand" select="replace(., '\?$', '')"/>
+                        <xsl:value-of
+                            select="string-join(tan:string-composite($text-to-expand), '')"/>
+                    </xsl:when>
+                    <xsl:when test="matches(., concat('^(', $sep-class, $ucd-name-class, '+)+$'))">
+                        <xsl:variable name="ucd-name-analyzed" as="element()">
+                            <analysis>
+                                <xsl:analyze-string select="."
+                                    regex="{concat('(',$sep-class,')(',$ucd-name-class,'+)')}">
+                                    <xsl:matching-substring>
+                                        <xsl:choose>
+                                            <xsl:when test="regex-group(1) = '.'">
+                                                <include>
+                                                  <xsl:value-of select="regex-group(2)"/>
+                                                </include>
+                                            </xsl:when>
+                                            <xsl:otherwise>
+                                                <exclude>
+                                                  <xsl:value-of select="regex-group(2)"/>
+                                                </exclude>
+                                            </xsl:otherwise>
+                                        </xsl:choose>
+                                    </xsl:matching-substring>
+                                </xsl:analyze-string>
+                            </analysis>
+                        </xsl:variable>
+                        <xsl:variable name="chars-found"
+                            select="tan:get-chars-by-name($ucd-name-analyzed/tan:include, $ucd-name-analyzed/tan:exclude)"
+                        />
+                        <xsl:value-of
+                            select="
+                                tan:codepoints-to-string(for $i in $chars-found
+                                return
+                                    xs:integer($i/@d))"
+                        />
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:message
+                            select="concat('Malformed {} expression ', ., '. Expression in braces should be hex values or unicode name keywords prepended by . or !')"
+                            terminate="yes"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each>
+        </xsl:variable>
+        <xsl:value-of select="string-join($val-parts-analyzed, '')"/>
+    </xsl:function>
+    
+    <xsl:function name="tan:get-chars-by-name" as="element()*">
+        <!-- Input: two sets of strings -->
+        <!-- Output: <char> elements from the Unicode database, the words of whose name (or alias) match all the first set and none of the second -->
+        <xsl:param name="words-in-name" as="xs:string*"/>
+        <xsl:param name="words-not-in-name" as="xs:string*"/>
+        <xsl:copy-of
+            select="
+                $unicode-db/tan:ucd/tan:char[*[every $i in $words-in-name
+                    satisfies * = $i and not(some $j in $words-not-in-name
+                        satisfies * = $j)]]"
+        />
+    </xsl:function>
+    
+    <xsl:function name="tan:replace-by-char-name" as="xs:string*">
+        <!-- Input: a string to be changed; three sets of strings; a boolean -->
+        <!-- Output: a set of strings following the rules below -->
+        <!-- The first input is broken into individual characters. Each character's Unicode name words are returned. Any names found in the first set of strings are removed. tan:get-chars-by-name() is invoked to find replacement characters -->
+        <!-- If the boolean is false, then the search will return unicode codepoints that might have other words in their name; otherwise the match must correspond to all words in the target name -->
+        <!-- If the analysis of a character results in no hits f rom tan:get-chars-by-name() then the original character is returned -->
+        <!-- The process will be applied to only the first name found, not aliases -->
+        <!-- This function was written primarily to transform Greek letters, e.g., acutes into graves -->
+        <xsl:param name="string-to-replace" as="xs:string?"/>
+        <xsl:param name="words-in-name-to-drop" as="xs:string*"/>
+        <xsl:param name="words-in-replacement-char-name" as="xs:string*"/>
+        <xsl:param name="words-not-in-replacement-char-name" as="xs:string*"/>
+        <xsl:param name="search-is-strict" as="xs:boolean?"/>
+        <xsl:for-each select="string-to-codepoints($string-to-replace)">
+            <xsl:variable name="this-code" select="."/>
+            <xsl:variable name="unicode-db-entry" select="$unicode-db/tan:ucd/tan:char[@d = $this-code]"/>
+            <xsl:variable name="this-name-words" select="$unicode-db-entry/*[1]/tan:n[not(. = $words-in-name-to-drop)]"/>
+            <xsl:variable name="replacements"
+                select="tan:get-chars-by-name(($this-name-words, $words-in-replacement-char-name), $words-not-in-replacement-char-name)"
+            />
+            <xsl:variable name="replacements-culled"
+                select="
+                    if ($search-is-strict = true()) then
+                        $replacements[*[every $i in tan:n
+                            satisfies $i = ($this-name-words, $words-in-replacement-char-name)]]
+                    else
+                        $replacements"
+            />
+            <xsl:choose>
+                <xsl:when test="not(exists($replacements-culled))">
+                    <xsl:value-of select="codepoints-to-string(.)"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of
+                        select="
+                            tan:codepoints-to-string(for $i in $replacements-culled
+                            return
+                                xs:integer($i/@d))"
+                    />
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:for-each>
     </xsl:function>
 
     <xsl:template match="node()" mode="add-square-brackets">
@@ -321,31 +321,192 @@
         </xsl:copy>
     </xsl:template>
 
+    <xsl:function name="tan:regex" as="xs:string?">
+        <!-- Input: string representing a regex pattern -->
+        <!-- Output: the regular expression adjusted to special rules -->
+        <xsl:param name="regex" as="xs:string?"/>
+        <xsl:variable name="pass-1" as="element()*">
+            <xsl:analyze-string select="$regex" regex="{$escapes-in-regex}">
+                <xsl:matching-substring>
+                    <escape class="{substring(.,2,1)}">
+                        <xsl:value-of select="."/>
+                    </escape>
+                </xsl:matching-substring>
+                <xsl:non-matching-substring>
+                    <xsl:analyze-string select="." regex="{$grouping-characters-in-regex}">
+                        <xsl:matching-substring>
+                            <group class="{.}">
+                                <xsl:value-of select="."/>
+                            </group>
+                        </xsl:matching-substring>
+                        <xsl:non-matching-substring>
+                            <regular>
+                                <xsl:value-of select="."/>
+                            </regular>
+                        </xsl:non-matching-substring>
+                    </xsl:analyze-string>
+                </xsl:non-matching-substring>
+            </xsl:analyze-string>
+        </xsl:variable>
+        <xsl:variable name="pass-2" as="element()">
+            <results>
+                <xsl:copy-of select="tan:new-regex-loop($pass-1, 0, ())"/>
+            </results>
+        </xsl:variable>
+        <xsl:variable name="pass-3" as="element()*">
+            <xsl:apply-templates select="$pass-2" mode="flat-levels-to-hierarchy">
+                <xsl:with-param name="next-level-to-group" select="1"/>
+            </xsl:apply-templates>
+        </xsl:variable>
+        <xsl:variable name="pass-4" as="xs:string*">
+            <xsl:apply-templates select="$pass-3" mode="escape-u"/>
+        </xsl:variable>
+        <!-- diagnostics, results -->
+        <!--<xsl:copy-of select="$pass-1"/>-->
+        <!--<xsl:copy-of select="$pass-2"/>-->
+        <!--<xsl:copy-of select="$pass-3"/>-->
+        <!--<xsl:copy-of select="$pass-4"/>-->
+        <xsl:value-of select="string-join($pass-4, '')"/>
+    </xsl:function>
+
+    <xsl:function name="tan:new-regex-loop" as="element()*">
+        <xsl:param name="elements-to-process" as="element()*"/>
+        <xsl:param name="current-group-level" as="xs:integer"/>
+        <xsl:param name="group-punctuation-so-far" as="xs:string*"/>
+        <xsl:choose>
+            <xsl:when test="count($elements-to-process) lt 1"/>
+            <xsl:otherwise>
+                <xsl:variable name="first-element" select="$elements-to-process[1]"/>
+                <xsl:variable name="current-group-punctuation"
+                    select="$group-punctuation-so-far[last()]"/>
+                <xsl:choose>
+                    <xsl:when test="name($first-element) = ('regular', 'escape')">
+                        <!--<xsl:copy-of select="$next-element"/>-->
+                        <xsl:choose>
+                            <xsl:when test="$current-group-level gt 0">
+                                <xsl:apply-templates select="$first-element"
+                                    mode="imprint-level-attribute">
+                                    <xsl:with-param name="level" select="$current-group-level"/>
+                                </xsl:apply-templates>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:copy-of select="$first-element"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                        <xsl:copy-of
+                            select="tan:new-regex-loop($elements-to-process[position() gt 1], $current-group-level, $group-punctuation-so-far)"
+                        />
+                    </xsl:when>
+                    <!-- From here we assume it's a group -->
+                    <xsl:when test="$first-element/@class = ('(', '[', '{')">
+                        <xsl:apply-templates select="$first-element" mode="imprint-level-attribute">
+                            <xsl:with-param name="level" select="$current-group-level + 1"/>
+                        </xsl:apply-templates>
+                        <xsl:copy-of
+                            select="tan:new-regex-loop($elements-to-process[position() gt 1], $current-group-level + 1, ($group-punctuation-so-far, $first-element/@class))"
+                        />
+                    </xsl:when>
+                    <xsl:when
+                        test="
+                            ($first-element/@class = ')' and $current-group-punctuation = '(')
+                            or ($first-element/@class = ']' and $current-group-punctuation = '[')
+                            or ($first-element/@class = '}' and $current-group-punctuation = '{')">
+                        <xsl:apply-templates select="$first-element" mode="imprint-level-attribute">
+                            <xsl:with-param name="level" select="$current-group-level"/>
+                        </xsl:apply-templates>
+                        <xsl:copy-of
+                            select="tan:new-regex-loop($elements-to-process[position() gt 1], $current-group-level - 1, $group-punctuation-so-far[position() lt last()])"
+                        />
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:message
+                            select="concat('Grouping symbol ', $current-group-punctuation, ' cannot be paired with ', $first-element/@class)"
+                            terminate="yes"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    <xsl:template match="*" mode="imprint-level-attribute">
+        <xsl:param name="level" as="xs:integer"/>
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:attribute name="level" select="$level"/>
+            <xsl:copy-of select="node()"/>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="*" mode="flat-levels-to-hierarchy">
+        <xsl:param name="next-level-to-group" as="xs:integer"/>
+        <xsl:copy>
+            <xsl:copy-of select="@* except @level"/>
+            <xsl:for-each-group select="*"
+                group-adjacent="
+                    if (exists(@level)) then
+                        (xs:integer(@level) ge $next-level-to-group)
+                    else
+                        false()">
+                <xsl:choose>
+                    <xsl:when test="current-group()[1]/@level = $next-level-to-group">
+                        <xsl:variable name="this-group-regrouped" as="element()">
+                            <xsl:apply-templates select="current-group()[1]"
+                                mode="append-new-content">
+                                <xsl:with-param name="new-content"
+                                    select="current-group()[position() gt 1]"/>
+                            </xsl:apply-templates>
+                        </xsl:variable>
+                        <xsl:apply-templates select="$this-group-regrouped" mode="#current">
+                            <xsl:with-param name="next-level-to-group"
+                                select="$next-level-to-group + 1"/>
+                        </xsl:apply-templates>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:copy-of select="current-group()"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each-group>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="*" mode="append-new-content">
+        <xsl:param name="new-content"/>
+        <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:apply-templates mode="#current"/>
+            <xsl:copy-of select="$new-content"/>
+        </xsl:copy>
+    </xsl:template>
+    <xsl:template match="text()" mode="append-new-content">
+        <text>
+            <xsl:value-of select="."/>
+        </text>
+    </xsl:template>
+
+    <xsl:template match="*" mode="escape-u">
+        <xsl:apply-templates mode="#current"/>
+    </xsl:template>
+    <xsl:template match="*[@class = 'u']" mode="escape-u">
+        <xsl:variable name="val-inside-braces" select="replace(., '.+\{([^\}]*)\}', '$1')"/>
+        <xsl:variable name="u-analysis" select="tan:escape(tan:process-regex-escape-u($val-inside-braces))"/>
+        <xsl:choose>
+            <xsl:when test="ancestor::tan:group/@class = '['">
+                <xsl:value-of select="$u-analysis"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="concat('[', $u-analysis, ']')"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
+
     <xsl:variable name="hex-key" as="xs:string+"
-        select="
-            '0',
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-            '6',
-            '7',
-            '8',
-            '9',
-            'A',
-            'B',
-            'C',
-            'D',
-            'E',
-            'F'"/>
-    <xsl:function name="tan:dec-to-hex" as="xs:string">
-        <!-- Change any integer into a hexadecimal string
-            Input: xs:integer 
-         Output: hexadecimal equivalent as a string 
-         E.g., 31 - > '1F'
-      -->
-        <xsl:param name="in" as="xs:integer"/>
+        select="('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')"/>
+    
+    <xsl:function name="tan:dec-to-hex" as="xs:string?">
+        <!-- Input: xs:integer -->
+        <!-- Output: the hexadecimal equivalent as a string, e.g., 31 - > '1F' -->
+        <xsl:param name="in" as="xs:integer?"/>
         <xsl:sequence
             select="
                 if ($in eq 0)
@@ -361,10 +522,9 @@
         />
     </xsl:function>
 
-    <xsl:function name="tan:hex-to-dec" as="item()*">
-        <!-- Change any hexadecimal string into an integer
-         E.g., '1F' - > 31
-      -->
+    <xsl:function name="tan:hex-to-dec" as="xs:integer?">
+        <!-- Input: a string representing a hexadecimal number -->
+        <!-- Output: the integer value, e.g., '1F' - > 31 -->
         <xsl:param name="hex" as="xs:string?"/>
         <xsl:variable name="split" as="xs:integer*">
             <xsl:analyze-string select="$hex" regex="[0-9a-fA-F]">
@@ -382,6 +542,5 @@
                     * (xs:integer(math:pow(16, $i - 1))))"
         />
     </xsl:function>
-
 
 </xsl:stylesheet>
