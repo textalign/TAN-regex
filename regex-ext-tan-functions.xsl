@@ -350,7 +350,7 @@
         </xsl:variable>
         <xsl:variable name="pass-2" as="element()">
             <results>
-                <xsl:copy-of select="tan:new-regex-loop($pass-1, 0, ())"/>
+                <xsl:copy-of select="tan:regex-loop($pass-1, 0, ())"/>
             </results>
         </xsl:variable>
         <xsl:variable name="pass-3" as="element()*">
@@ -369,7 +369,7 @@
         <xsl:value-of select="string-join($pass-4, '')"/>
     </xsl:function>
 
-    <xsl:function name="tan:new-regex-loop" as="element()*">
+    <xsl:function name="tan:regex-loop" as="element()*">
         <xsl:param name="elements-to-process" as="element()*"/>
         <xsl:param name="current-group-level" as="xs:integer"/>
         <xsl:param name="group-punctuation-so-far" as="xs:string*"/>
@@ -394,7 +394,7 @@
                             </xsl:otherwise>
                         </xsl:choose>
                         <xsl:copy-of
-                            select="tan:new-regex-loop($elements-to-process[position() gt 1], $current-group-level, $group-punctuation-so-far)"
+                            select="tan:regex-loop($elements-to-process[position() gt 1], $current-group-level, $group-punctuation-so-far)"
                         />
                     </xsl:when>
                     <!-- From here we assume it's a group -->
@@ -403,7 +403,7 @@
                             <xsl:with-param name="level" select="$current-group-level + 1"/>
                         </xsl:apply-templates>
                         <xsl:copy-of
-                            select="tan:new-regex-loop($elements-to-process[position() gt 1], $current-group-level + 1, ($group-punctuation-so-far, $first-element/@class))"
+                            select="tan:regex-loop($elements-to-process[position() gt 1], $current-group-level + 1, ($group-punctuation-so-far, $first-element/@class))"
                         />
                     </xsl:when>
                     <xsl:when
@@ -415,7 +415,7 @@
                             <xsl:with-param name="level" select="$current-group-level"/>
                         </xsl:apply-templates>
                         <xsl:copy-of
-                            select="tan:new-regex-loop($elements-to-process[position() gt 1], $current-group-level - 1, $group-punctuation-so-far[position() lt last()])"
+                            select="tan:regex-loop($elements-to-process[position() gt 1], $current-group-level - 1, $group-punctuation-so-far[position() lt last()])"
                         />
                     </xsl:when>
                     <xsl:otherwise>
