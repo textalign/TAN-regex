@@ -24,9 +24,9 @@
         <xsl:param name="strings" as="xs:string*"/>
         <xsl:copy-of
             select="
-            for $i in $strings
-            return
-            replace($i, concat('(', $characters-to-escape-when-converting-string-to-regex, ')'), '\\$1')"
+                for $i in $strings
+                return
+                    replace($i, concat('(', $characters-to-escape-when-converting-string-to-regex, ')'), '\\$1')"
         />
     </xsl:function>
 
@@ -235,7 +235,7 @@
         <!-- Output: a set of strings following the rules below -->
         <!-- The first input is broken into individual characters. Each character's Unicode name words are returned. Any names found in the first set of strings are removed. tan:get-chars-by-name() is invoked to find replacement characters -->
         <!-- If the boolean is false, then the search will return unicode codepoints that might have other words in their name; otherwise the match must correspond to all words in the target name -->
-        <!-- If the analysis of a character results in no hits f rom tan:get-chars-by-name() then the original character is returned -->
+        <!-- If the analysis of a character results in no hits from tan:get-chars-by-name() then the original character is returned -->
         <!-- The process will be applied to only the first name found, not aliases -->
         <!-- This function was written primarily to transform Greek letters, e.g., acutes into graves -->
         <xsl:param name="string-to-replace" as="xs:string?"/>
