@@ -361,11 +361,14 @@
         <xsl:variable name="pass-4" as="xs:string*">
             <xsl:apply-templates select="$pass-3" mode="escape-u"/>
         </xsl:variable>
-        <!-- diagnostics, results -->
-        <!--<xsl:copy-of select="$pass-1"/>-->
-        <!--<xsl:copy-of select="$pass-2"/>-->
-        <!--<xsl:copy-of select="$pass-3"/>-->
-        <!--<xsl:copy-of select="$pass-4"/>-->
+        <xsl:variable name="diagnostics-on" select="false()"/>
+        <xsl:if test="$diagnostics-on">
+            <xsl:message select="'diagnostics on for tan:regex()'"/>
+            <xsl:message select="'pass 1: ', $pass-1"/>
+            <xsl:message select="'pass 2: ', $pass-2"/>
+            <xsl:message select="'pass 3: ', $pass-3"/>
+            <xsl:message select="'pass 4: ', $pass-4"/>
+        </xsl:if>
         <xsl:value-of select="string-join($pass-4, '')"/>
     </xsl:function>
 
@@ -502,24 +505,44 @@
 
     <xsl:variable name="hex-key" as="xs:string+"
         select="('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')"/>
+    <xsl:variable name="base64-key" as="xs:string+"
+        select="('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '\')"
+    />
     
     <xsl:function name="tan:dec-to-hex" as="xs:string?">
         <!-- Input: xs:integer -->
         <!-- Output: the hexadecimal equivalent as a string, e.g., 31 - > '1F' -->
         <xsl:param name="in" as="xs:integer?"/>
-        <xsl:sequence
-            select="
-                if ($in eq 0)
-                then
-                    '0'
-                else
-                    concat(if ($in gt 16)
-                    then
-                        tan:dec-to-hex($in idiv 16)
-                    else
-                        '',
-                    $hex-key[($in mod 16) + 1])"
-        />
+        <xsl:sequence select="tan:dec-to-n($in, 16)"/>
+    </xsl:function>
+    
+    <xsl:function name="tan:dec-to-n" as="xs:string?">
+        <!-- Input: two integers, the second less than 17 -->
+        <!-- Output: a string that represents the first numeral in base N, where N is the second numeral -->
+        <xsl:param name="in" as="xs:integer?"/>
+        <xsl:param name="base" as="xs:integer"/>
+        <xsl:choose>
+            <xsl:when test="$base le 16">
+                <xsl:sequence
+                    select="
+                        if ($in eq 0)
+                        then
+                            '0'
+                        else
+                            concat(if ($in gt $base)
+                            then
+                                tan:dec-to-n($in idiv $base, $base)
+                            else
+                                '',
+                            $hex-key[($in mod $base) + 1])"
+                />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:message
+                    select="'tan:dec-to-n() does not support base N systems where N is greater than 16 (hexadecimal)'"
+                />
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:function>
 
     <xsl:function name="tan:hex-to-dec" as="xs:integer?">
@@ -541,6 +564,62 @@
                     $split-rev[$i]
                     * (xs:integer(math:pow(16, $i - 1))))"
         />
+    </xsl:function>
+    
+    <xsl:function name="tan:n-to-dec" as="xs:integer?">
+        <!-- Input: string representation of some number; an integer -->
+        <!-- Output: an integer representing the first parameter in the base system of the 2nd parameter -->
+        <xsl:param name="input" as="xs:string?"/>
+        <xsl:param name="base-n" as="xs:integer"/>
+        <xsl:variable name="this-key" as="xs:string*">
+            <xsl:choose>
+                <xsl:when test="$base-n le 16">
+                    <xsl:sequence select="$hex-key"/>
+                </xsl:when>
+                <xsl:when test="$base-n = 64">
+                    <xsl:sequence select="$base64-key"/>
+                </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="input-normalized"
+            select="
+                if ($base-n le 16) then
+                    upper-case($input)
+                else
+                    $input"
+        />
+        <xsl:variable name="digit-sequence" as="xs:integer*">
+            <xsl:analyze-string select="$input-normalized" regex=".">
+                <xsl:matching-substring>
+                    <xsl:copy-of select="index-of($this-key, .) - 1"/>
+                </xsl:matching-substring>
+            </xsl:analyze-string>
+        </xsl:variable>
+        <xsl:variable name="split-rev" select="reverse($digit-sequence)"/>
+        <xsl:variable name="diagnostics-on" select="false()"/>
+        <xsl:if test="$diagnostics-on">
+            <xsl:message select="'diagnostics on for tan:n-to-dec()'"/>
+            <xsl:message select="'input normalized: ', $input-normalized"/>
+            <xsl:message select="'input is what base: ', $base-n"/>
+            <xsl:message select="'this key: ', $this-key"/>
+            <xsl:message select="'digit sequence: ', $digit-sequence"/>
+        </xsl:if>
+        <xsl:choose>
+            <xsl:when test="exists($this-key)">
+                <xsl:copy-of
+                    select="
+                        sum(for $i in (1 to count($digit-sequence))
+                        return
+                            $split-rev[$i]
+                            * (xs:integer(math:pow($base-n, $i - 1))))"
+                />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:message
+                    select="'tan:n-to-dec() supports systems whose base values are hexadecimal or less, or base64'"
+                />
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:function>
 
 </xsl:stylesheet>
