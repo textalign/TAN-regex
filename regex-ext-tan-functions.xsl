@@ -529,7 +529,7 @@
                         then
                             '0'
                         else
-                            concat(if ($in gt $base)
+                            concat(if ($in ge $base)
                             then
                                 tan:dec-to-n($in idiv $base, $base)
                             else
