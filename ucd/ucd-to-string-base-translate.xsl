@@ -2,11 +2,11 @@
 <xsl:stylesheet xmlns="tag:textalign.net,2015:ns" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:tan="tag:textalign.net,2015:ns" xmlns:u="http://www.unicode.org/ns/2003/ucd/1.0"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="xs" version="2.0">
-    <!-- Input: the Unicode database in XML -->
+    <!-- Input: any XML file (including this one) -->
     <!-- Output: an XML file that maps precomposed characters to their base characters. -->
     <xsl:include href="../regex-ext-tan-functions.xsl"/>
 
-    <xsl:variable name="unicode-database" select="."/>
+    <xsl:variable name="unicode-database" select="document('ucd.nounihan.grouped.xml')"/>
     <xsl:template match="/*">
         <translate>
             <xsl:comment>
