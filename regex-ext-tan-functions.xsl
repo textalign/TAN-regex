@@ -14,7 +14,7 @@
         select="'[\.\[\]\\\|\^\$\?\*\+\{\}\(\)]'"/>
     <!-- this is a regular expression pattern to find specially escaped characters in a string that is a regular expression -->
     <xsl:variable name="escapes-in-regex" as="xs:string"
-        select="'\\[\.\[\]\\\|\-\^\$\?\*\+\{\}\(\)nrt]|\\[pPu]\{[^\}]*\}'"/>
+        select="'\\[\.\[\]\\\|\-\^\$\?\*\+\{\}\(\)nrtdDsSiIcCwW\d]|\\[pPu]\{[^\}]*\}'"/>
     <!-- this is a regular expression pattern to find characters that designate groups in a regular expression -->
     <xsl:variable name="grouping-characters-in-regex" select="'[\(\)\{\}\[\]]'"/>
     
@@ -618,6 +618,23 @@
                 <xsl:message
                     select="'tan:n-to-dec() supports systems whose base values are hexadecimal or less, or base64'"
                 />
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    
+    <xsl:function name="tan:regex-is-valid" as="xs:boolean">
+        <!-- Input: a string -->
+        <!-- Output: true if the string is a valid regular expression, false otherwise -->
+        <xsl:param name="input-regex" as="xs:string?"/>
+        <xsl:choose>
+            <xsl:when test="fn:not(fn:exists($input-regex))">
+                <xsl:value-of select="false()"/>
+            </xsl:when>
+            <xsl:when test="matches($input-regex, '\\[^nrtpPsSiIcCdDuwW\\|.?*+(){}#x2D#x5B#x5D#x5E\]\[\^\-]')">
+                <xsl:value-of select="false()"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="true()"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
