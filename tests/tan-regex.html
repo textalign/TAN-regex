@@ -1,0 +1,806 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <title>Test Report for E:/Joel/Dropbox/TAN/TAN-2020/functions/regex/regex-ext-tan-functions.xsl (passed: 46 / pending: 3 / failed: 0 / total: 49)</title>
+      <link rel="stylesheet" type="text/css" href="file:/C:/Users/Joel/AppData/Roaming/com.oxygenxml/extensions/v22.0/frameworks/https_www.oxygenxml.com_InstData_Addons_community_updateSite.xml/xspec.support-1.5.0/src/reporter/test-report.css" />
+   </head>
+   <body>
+      <h1>Test Report</h1>
+      <p>Stylesheet: <a href="file:/E:/Joel/Dropbox/TAN/TAN-2020/functions/regex/regex-ext-tan-functions.xsl">E:/Joel/Dropbox/TAN/TAN-2020/functions/regex/regex-ext-tan-functions.xsl</a></p>
+      <p>XSpec: <a href="file:/E:/Joel/Dropbox/TAN/TAN-2020/functions/regex/tests/tan-regex.xspec">E:/Joel/Dropbox/TAN/TAN-2020/functions/regex/tests/tan-regex.xspec</a></p>
+      <p>Tested: 28 March 2020 at 09:28</p>
+      <h2>Contents</h2>
+      <table class="xspec">
+         <colgroup>
+            <col style="width:75%" />
+            <col style="width:6.25%" />
+            <col style="width:6.25%" />
+            <col style="width:6.25%" />
+            <col style="width:6.25%" />
+         </colgroup>
+         <thead>
+            <tr>
+               <th></th>
+               <th class="totals">passed: 46</th>
+               <th class="totals">pending: 3</th>
+               <th class="totals">failed: 0</th>
+               <th class="totals">total: 49</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e3">rgx:best-unicode-version()</a></th>
+               <th class="totals">3</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">3</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e29">rgx:escape()</a></th>
+               <th class="totals">1</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">1</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e39">rgx:matches()</a></th>
+               <th class="totals">3</th>
+               <th class="totals">1</th>
+               <th class="totals">0</th>
+               <th class="totals">4</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e78">rgx:replace()</a></th>
+               <th class="totals">3</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">3</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e112">rgx:tokenize()</a></th>
+               <th class="totals">3</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">3</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e141">rgx:analyze-string()</a></th>
+               <th class="totals">1</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">1</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e164">rgx:regex()</a></th>
+               <th class="totals">3</th>
+               <th class="totals">1</th>
+               <th class="totals">0</th>
+               <th class="totals">4</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e198">rgx:parse-regex()</a></th>
+               <th class="totals">2</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">2</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e268">rgx:regex-is-valid()</a></th>
+               <th class="totals">3</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">3</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e294">rgx:string-base()</a></th>
+               <th class="totals">3</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">3</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e320">rgx:string-to-components()</a></th>
+               <th class="totals">2</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">2</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e339">rgx:string-to-composites()</a></th>
+               <th class="totals">2</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">2</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e357">rgx:codepoints-to-string()</a></th>
+               <th class="totals">1</th>
+               <th class="totals">1</th>
+               <th class="totals">0</th>
+               <th class="totals">2</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e374">rgx:process-regex-escape-u()</a></th>
+               <th class="totals">6</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">6</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e424">rgx:get-chars-by-name()</a></th>
+               <th class="totals">2</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">2</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e464">rgx:replace-by-char-name()</a></th>
+               <th class="totals">3</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">3</th>
+            </tr>
+            <tr class="successful">
+               <th><a href="#top-level-scenario-d817e502">numbers: converting base systems</a></th>
+               <th class="totals">5</th>
+               <th class="totals">0</th>
+               <th class="totals">0</th>
+               <th class="totals">5</th>
+            </tr>
+         </tbody>
+      </table>
+      <div id="top-level-scenario-d817e3">
+         <h2 class="successful">rgx:best-unicode-version()<span class="scenario-totals">passed: 3 / pending: 0 / failed: 0 / total: 3</span></h2>
+         <table class="xspec" id="t-d817e3">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:best-unicode-version()</th>
+                  <th>passed: 3 / pending: 0 / failed: 0 / total: 3</th>
+               </tr>
+               <tr class="successful">
+                  <th>Unreleased Unicode version</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Future Unicode version &gt; latest</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Unicode version before the XML data was provided</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>4.0 &gt; 5.1</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Old Unicode version not supported</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>6.1 &gt; 6.0 (older versions are normally x.0)</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e29">
+         <h2 class="successful">rgx:escape()<span class="scenario-totals">passed: 1 / pending: 0 / failed: 0 / total: 1</span></h2>
+         <table class="xspec" id="t-d817e29">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:escape()</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <th>attribute value regex</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>escaped attribute value regex</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e39">
+         <h2 class="successful">rgx:matches()<span class="scenario-totals">passed: 3 / pending: 1 / failed: 0 / total: 4</span></h2>
+         <table class="xspec" id="t-d817e39">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:matches()</th>
+                  <th>passed: 3 / pending: 1 / failed: 0 / total: 4</th>
+               </tr>
+               <tr class="successful">
+                  <th>Simple match with \u{} + name</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>abc matches \u{.latin}</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Simple match with \u{} + hex range</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'A' matches \u{61} (= 'a') with flag 'i'</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="pending">
+                  <th>Simple match on \u{} + name based on older Unicode version</th>
+                  <th>passed: 0 / pending: 1 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="pending">
+                  <td>U+1F5EA TWO SPEECH BUBBLES doesn't match \u{.bubbles} in Unicode version 6.0 because
+                     'BUBBLES' was introduced only in 7.0</td>
+                  <td>Pending</td>
+               </tr>
+               <tr class="successful">
+                  <th>Greek words with two accents</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'σῶσόν με' matches the pattern for Greek words with two accents</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e78">
+         <h2 class="successful">rgx:replace()<span class="scenario-totals">passed: 3 / pending: 0 / failed: 0 / total: 3</span></h2>
+         <table class="xspec" id="t-d817e78">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:replace()</th>
+                  <th>passed: 3 / pending: 0 / failed: 0 / total: 3</th>
+               </tr>
+               <tr class="successful">
+                  <th>Simple replace using composite class</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Replacing 'A+⁺₊﬩﹢＋Z' with \u{++} (all characters that have the + as a base character)
+                     should result in 'AZ'</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Simple replace using name component class, older version of Unicode</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Unicode 6.0: replacing 'A🍶🍼🍾🧴Z' with '\u{.bottle}' = 'A🍶🍼Z'</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Simple replace using name component class, current version of Unicode</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Unicode: replacing 'A🍶🍼🍾🧴Z' with '\u{.bottle}' = 'AZ'</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e112">
+         <h2 class="successful">rgx:tokenize()<span class="scenario-totals">passed: 3 / pending: 0 / failed: 0 / total: 3</span></h2>
+         <table class="xspec" id="t-d817e112">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:tokenize()</th>
+                  <th>passed: 3 / pending: 0 / failed: 0 / total: 3</th>
+               </tr>
+               <tr class="successful">
+                  <th>Tokenizing on composite class</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Tokenizing 'XàXáXâXãXäX' with '\u{+a}' leaves six strings</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Tokenizing on name word class</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Tokenizing 'XàXáXâXãXäX' with '\u{.a}' leaves six strings</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Tokenizing on name word class</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Tokenizing 'XàXáXâXãXäX' with '\u{.a!circumflex}' leaves five strings</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e141">
+         <h2 class="successful">rgx:analyze-string()<span class="scenario-totals">passed: 1 / pending: 0 / failed: 0 / total: 1</span></h2>
+         <table class="xspec" id="t-d817e141">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:analyze-string()</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <th>Analyzing string based on name word class</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Analyzing abcABC with \u{.b} leaves five child elements in the resultant &lt;analyze-string-result&gt;</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e164">
+         <h2 class="successful">rgx:regex()<span class="scenario-totals">passed: 3 / pending: 1 / failed: 0 / total: 4</span></h2>
+         <table class="xspec" id="t-d817e164">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:regex()</th>
+                  <th>passed: 3 / pending: 1 / failed: 0 / total: 4</th>
+               </tr>
+               <tr class="pending">
+                  <th>Simple expansion of regex \u{} with name, older version of Unicode</th>
+                  <th>passed: 0 / pending: 1 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="pending">
+                  <td>\u{.bubbles} for Unicode 6.0 should be empty, and so an error should be thrown, not
+                     supported in XSpec</td>
+                  <td>Pending</td>
+               </tr>
+               <tr class="successful">
+                  <th>Simple expansion of regex \u{} with name, older version of Unicode</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>\u{.bottle} for Unicode 6.0 should have two characters</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Simple expansion of regex \u{} with name, latest Unicode</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>\u{.bottle} for latest Unicode should have four characters</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Greek letter patterns</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Pattern for Greek words with two accents</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e198">
+         <h2 class="successful">rgx:parse-regex()<span class="scenario-totals">passed: 2 / pending: 0 / failed: 0 / total: 2</span></h2>
+         <table class="xspec" id="t-d817e198">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:parse-regex()</th>
+                  <th>passed: 2 / pending: 0 / failed: 0 / total: 2</th>
+               </tr>
+               <tr class="successful">
+                  <th>Analysis of regular expression</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>\u{.bubbles} for Unicode 6.0 should be empty</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Nested groups of regular expression</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>(\u{.bottle}|a(bc)) should have parsed results with several elements</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e268">
+         <h2 class="successful">rgx:regex-is-valid()<span class="scenario-totals">passed: 3 / pending: 0 / failed: 0 / total: 3</span></h2>
+         <table class="xspec" id="t-d817e268">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:regex-is-valid()</th>
+                  <th>passed: 3 / pending: 0 / failed: 0 / total: 3</th>
+               </tr>
+               <tr class="successful">
+                  <th>Bad regular expression</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'({' is a malformed regular expression</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Good regular expression</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'(\{)' is a valid regular expression</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Malformed \u</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'\u{%}' is not a valid regular expression</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e294">
+         <h2 class="successful">rgx:string-base()<span class="scenario-totals">passed: 3 / pending: 0 / failed: 0 / total: 3</span></h2>
+         <table class="xspec" id="t-d817e294">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:string-base()</th>
+                  <th>passed: 3 / pending: 0 / failed: 0 / total: 3</th>
+               </tr>
+               <tr class="successful">
+                  <th>Greek replacement</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>ἀνθρὠπους - &gt; ανθρωπους</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>CJK Compatibility replacement</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>㍴ - &gt; bar</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Composites of b</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>composite b's, mostly to b (but not ㍴, ㏔, and ㏝, which are complex and don't have
+                     singleton replacements)</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e320">
+         <h2 class="successful">rgx:string-to-components()<span class="scenario-totals">passed: 2 / pending: 0 / failed: 0 / total: 2</span></h2>
+         <table class="xspec" id="t-d817e320">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:string-to-components()</th>
+                  <th>passed: 2 / pending: 0 / failed: 0 / total: 2</th>
+               </tr>
+               <tr class="successful">
+                  <th>simple string to components</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>CJK characters ㍴㏔㏝ &gt; bar, mb, Wb</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Greek string to components</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>ἄνθρωπός &gt; '#x3b1 x313 x301', 'ν', 'θ', 'ρ', 'ω', 'π', 'x3bf x301', 'ς'</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e339">
+         <h2 class="successful">rgx:string-to-composites()<span class="scenario-totals">passed: 2 / pending: 0 / failed: 0 / total: 2</span></h2>
+         <table class="xspec" id="t-d817e339">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:string-to-composites()</th>
+                  <th>passed: 2 / pending: 0 / failed: 0 / total: 2</th>
+               </tr>
+               <tr class="successful">
+                  <th>single character to composites</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'b' &gt; 'bᵇḃḅḇ⒝ⓑ㍴㏔㏝ｂ𝐛𝑏𝒃𝒷𝓫𝔟𝕓𝖇𝖻𝗯𝘣𝙗𝚋'</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>string to composites</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'b ἄ🙋' &gt; sequence of four strings: composites of b and U+0020 SPACE, and singletons
+                     ἄ and U+1F64B HAPPY PERSON RAISING ONE HAND</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e357">
+         <h2 class="successful">rgx:codepoints-to-string()<span class="scenario-totals">passed: 1 / pending: 1 / failed: 0 / total: 2</span></h2>
+         <table class="xspec" id="t-d817e357">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:codepoints-to-string()</th>
+                  <th>passed: 1 / pending: 1 / failed: 0 / total: 2</th>
+               </tr>
+               <tr class="successful">
+                  <th>first 33 codepoints in XML 1.0</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Only tab (9), end of line (10 = xA), carriage return (13 = xD), and space (32 = x20)</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="pending">
+                  <th>(<strong>XML 1.1 characters make Calabash XProc engine crash 🙁</strong>) first 33 codepoints in XML 1.1</th>
+                  <th>passed: 0 / pending: 1 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="pending">
+                  <td>(<strong>XML 1.1 characters make Calabash XProc engine crash 🙁</strong>) Everything but null (x0)</td>
+                  <td>Pending</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e374">
+         <h2 class="successful">rgx:process-regex-escape-u()<span class="scenario-totals">passed: 6 / pending: 0 / failed: 0 / total: 6</span></h2>
+         <table class="xspec" id="t-d817e374">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:process-regex-escape-u()</th>
+                  <th>passed: 6 / pending: 0 / failed: 0 / total: 6</th>
+               </tr>
+               <tr class="successful">
+                  <th>Hex values</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>4d-4f, 51 &gt; entities, no spaces or commas</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Expansion to composites</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>+b &gt; composite b characters</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Reduction to base forms</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'-ḉ' &gt; 'c'</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Chained name keywords: Greek</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'.greek.capital.perispomeni' &gt; 'ἎἏἮἯἾἿὟὮὯᾎᾏᾞᾟᾮᾯ'</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Chained name keywords: Latin</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'.latin.cedilla' &gt; 'ÇçĢģĶķĻļŅņŖŗŞşŢţȨȩᷗḈḉḐḑḜḝḨḩ'</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Chained name keywords: Ms that are not small, capital, or Latin</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'.m!small!capital!latin' &gt; 'ൔᒻᒼᒾᒿᛗᛘᛙᣘᧄᮿᰮㄇ㎛㎡㎥㎧㎨㏁㏞㏟ꚳꩌ𐊎𐊪𐤪𑪐𑫟𖥑𖨑𛰏𛰙𛰝𛰞𛰟𛰡𛰧𛰫𛰬𛰭𛰼𛱪🇲'</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e424">
+         <h2 class="successful">rgx:get-chars-by-name()<span class="scenario-totals">passed: 2 / pending: 0 / failed: 0 / total: 2</span></h2>
+         <table class="xspec" id="t-d817e424">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:get-chars-by-name()</th>
+                  <th>passed: 2 / pending: 0 / failed: 0 / total: 2</th>
+               </tr>
+               <tr class="successful">
+                  <th>Simple query</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>SUPERSCRIPT ThReE: 1 element (input case doesn't matter)</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>. and ! filters</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>.suspension.mark!combining: 1 element</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e464">
+         <h2 class="successful">rgx:replace-by-char-name()<span class="scenario-totals">passed: 3 / pending: 0 / failed: 0 / total: 3</span></h2>
+         <table class="xspec" id="t-d817e464">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>rgx:replace-by-char-name()</th>
+                  <th>passed: 3 / pending: 0 / failed: 0 / total: 3</th>
+               </tr>
+               <tr class="successful">
+                  <th>Latin accents</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Acute accents to circumflexes: 'áéíóú' &gt; 'âêîôû'</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Greek accents</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>Greek rough breathings (DASIA) to smooth (PSILI): 'ἃ Ἃ Ὅ ὥ ᾝ ᾓ ᾃ' &gt; 'ἂ Ἂ Ὄ ὤ ᾜ ᾒ ᾂ'
+                     </td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>Greek accents</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>ἀδελφὲ ἀπὸ τοῦ πονηροῦ. &gt; </td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+      <div id="top-level-scenario-d817e502">
+         <h2 class="successful">numbers: converting base systems<span class="scenario-totals">passed: 5 / pending: 0 / failed: 0 / total: 5</span></h2>
+         <table class="xspec" id="t-d817e502">
+            <colgroup>
+               <col style="width:75%" />
+               <col style="width:25%" />
+            </colgroup>
+            <tbody>
+               <tr class="successful">
+                  <th>numbers: converting base systems</th>
+                  <th>passed: 5 / pending: 0 / failed: 0 / total: 5</th>
+               </tr>
+               <tr class="successful">
+                  <th>rgx:dec-to-hex()</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>32 &gt; 20</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>rgx:hex-to-dec()</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>hex 1FAB &gt; 8107</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>rgx:dec-to-n()</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>8 &gt; base 2 = 100</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>rgx:dec-to-n()</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>2117 &gt; base 13 = 126B</td>
+                  <td>Success</td>
+               </tr>
+               <tr class="successful">
+                  <th>rgx:n-to-dec()</th>
+                  <th>passed: 1 / pending: 0 / failed: 0 / total: 1</th>
+               </tr>
+               <tr class="successful">
+                  <td>'abc23' hex = 703523 decimal'</td>
+                  <td>Success</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </body>
+</html>

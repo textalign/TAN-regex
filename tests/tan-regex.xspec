@@ -1,0 +1,480 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec"
+    xmlns:rgx="tag:textalign.net,2015:ns" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    stylesheet="file:/E:/Joel/Dropbox/TAN/TAN-2020/functions/regex/regex-ext-tan-functions.xsl">
+    
+    <x:variable name="text-with-bubbles" select="'🗪 U+1F5EA TWO SPEECH BUBBLES'"/>
+    <x:variable name="pattern-for-bubbles" select="'\u{.bubbles}'"/>
+    <x:variable name="pattern-for-bottle" select="'\u{.bottle}'"/>
+    <x:variable name="pattern-for-composite-plus" select="'\u{++}'"/>
+    <x:variable name="pattern-for-composite-b" select="'\u{+b}'"/>
+    <x:variable name="named-bottle-chars" select="'🍶🍼🍾🧴'"/>
+    <x:variable name="composite-plus-chars" select="'+⁺₊﬩﹢＋'"/>
+    <x:variable name="composite-b-chars" select="'bᵇḃḅḇ⒝ⓑ㍴㏔㏝ｂ𝐛𝑏𝒃𝒷𝓫𝔟𝕓𝖇𝖻𝗯𝘣𝙗𝚋'"/>
+    <x:variable name="pattern-for-greek-accent"
+        select="'\u{.greek.tonos .greek.oxia .greek.varia .greek.perispomeni}'"/>
+    <x:variable name="pattern-for-greek-with-two-accents"
+        select="$pattern-for-greek-accent || '\S*' || $pattern-for-greek-accent"/>
+    
+    <x:scenario label="rgx:best-unicode-version()">
+        <x:scenario label="Unreleased Unicode version">
+            <x:call function="rgx:best-unicode-version">
+                <x:param name="version" select="99.0"/>
+            </x:call>
+            <x:expect label="Future Unicode version > latest" select="13.0"/>
+        </x:scenario>
+        <x:scenario label="Unicode version before the XML data was provided">
+            <x:call function="rgx:best-unicode-version">
+                <x:param name="version" select="4.0"/>
+            </x:call>
+            <x:expect label="4.0 > 5.1" select="5.1"/>
+        </x:scenario>
+        <x:scenario label="Old Unicode version not supported">
+            <x:call function="rgx:best-unicode-version">
+                <x:param name="version" select="6.1"/>
+            </x:call>
+            <x:expect label="6.1 > 6.0 (older versions are normally x.0)" select="6.0"/>
+        </x:scenario>
+    </x:scenario>
+
+    <x:scenario label="rgx:escape()">
+        <x:scenario label="attribute value regex">
+            <x:variable name="input" as="xs:string">"([^"]+)"</x:variable>
+            <x:variable name="output" as="xs:string">"\(\[\^"\]\+\)"</x:variable>
+            <x:call function="rgx:escape">
+                <x:param name="strings" select="$input"/>
+            </x:call>
+            <x:expect label="escaped attribute value regex" select="$output"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:matches()">
+        <x:scenario label="Simple match with \u{} + name">
+            <x:call function="rgx:matches">
+                <x:param name="input" select="'abc'"/>
+                <x:param name="pattern" select="'\u{.latin}'"/>
+            </x:call>
+            <x:expect label="abc matches \u{.latin}" select="true()"/>
+        </x:scenario>
+        <x:scenario label="Simple match with \u{} + hex range">
+            <x:call function="rgx:matches">
+                <x:param name="input" select="'ABC'"/>
+                <x:param name="pattern" select="'\u{24-26, 5f-61}'"/>
+                <x:param name="flags" select="'i'"/>
+            </x:call>
+            <x:expect label="'A' matches \u{61} (= 'a') with flag 'i'" select="true()"/>
+        </x:scenario>
+        <x:pending>
+            <!-- This should throw an error, but XSpec doesn't support expectations of a thrown error -->
+            <x:scenario label="Simple match on \u{} + name based on older Unicode version">
+                <x:call function="rgx:matches">
+                    <x:param name="input" select="$text-with-bubbles"/>
+                    <x:param name="pattern" select="$pattern-for-bubbles"/>
+                    <x:param name="flags" select="'6.0'"/>
+                </x:call>
+                <x:expect
+                    label="U+1F5EA TWO SPEECH BUBBLES doesn't match \u{.bubbles} in Unicode version 6.0 because 'BUBBLES' was introduced only in 7.0"
+                    select="false()"/>
+            </x:scenario>
+        </x:pending>
+        <x:scenario label="Greek words with two accents">
+            <x:call function="rgx:matches">
+                <x:param name="input" select="'σῶσόν με'"/>
+                <x:param name="pattern" select="$pattern-for-greek-with-two-accents"/>
+                <x:param name="flags" select="''"/>
+            </x:call>
+            <x:expect label="'σῶσόν με' matches the pattern for Greek words with two accents" select="true()"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:replace()">
+        <x:scenario label="Simple replace using composite class">
+            <x:call function="rgx:replace">
+                <x:param name="input" select="'A' || $composite-plus-chars || 'Z'"/>
+                <x:param name="pattern" select="$pattern-for-composite-plus"/>
+                <x:param name="replacement" select="''"/>
+            </x:call>
+            <x:expect label="Replacing 'A+⁺₊﬩﹢＋Z' with \u{++} (all characters that have the + as a base character) should result in 'AZ'" select="'AZ'"/>
+        </x:scenario>
+        <x:scenario label="Simple replace using name component class, older version of Unicode">
+            <x:call function="rgx:replace">
+                <x:param name="input" select="'A' || $named-bottle-chars || 'Z'"/>
+                <x:param name="pattern" select="$pattern-for-bottle"/>
+                <x:param name="replacement" select="''"/>
+                <x:param name="flags" select="'6.0'"/>
+            </x:call>
+            <x:expect label="Unicode 6.0: replacing 'A🍶🍼🍾🧴Z' with '\u{.bottle}' = 'A🍶🍼Z'" select="'A🍾🧴Z'"/>
+        </x:scenario>
+        <x:scenario label="Simple replace using name component class, current version of Unicode">
+            <x:call function="rgx:replace">
+                <x:param name="input" select="'A' || $named-bottle-chars || 'Z'"/>
+                <x:param name="pattern" select="$pattern-for-bottle"/>
+                <x:param name="replacement" select="''"/>
+                <x:param name="flags" select="''"/>
+            </x:call>
+            <x:expect label="Unicode: replacing 'A🍶🍼🍾🧴Z' with '\u{.bottle}' = 'AZ'" select="'AZ'"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:tokenize()">
+        <x:scenario label="Tokenizing on composite class">
+            <x:call function="rgx:tokenize">
+                <x:param name="input" select="'XàXáXâXãXäX'"/>
+                <x:param name="pattern" select="'\u{+a}'"/>
+            </x:call>
+            <x:expect label="Tokenizing 'XàXáXâXãXäX' with '\u{+a}' leaves six strings" select="'X', 'X', 'X', 'X', 'X', 'X'"/>
+        </x:scenario>
+        <x:scenario label="Tokenizing on name word class">
+            <x:call function="rgx:tokenize">
+                <x:param name="input" select="'XàXáXâXãXäX'"/>
+                <x:param name="pattern" select="'\u{.a}'"/>
+            </x:call>
+            <x:expect label="Tokenizing 'XàXáXâXãXäX' with '\u{.a}' leaves six strings" select="'X', 'X', 'X', 'X', 'X', 'X'"/>
+        </x:scenario>
+        <x:scenario label="Tokenizing on name word class">
+            <x:call function="rgx:tokenize">
+                <x:param name="input" select="'XàXáXâXãXäX'"/>
+                <x:param name="pattern" select="'\u{.a!circumflex}'"/>
+            </x:call>
+            <x:expect label="Tokenizing 'XàXáXâXãXäX' with '\u{.a!circumflex}' leaves five strings" select="'X', 'X', 'XâX', 'X', 'X'"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:analyze-string()">
+        <x:scenario label="Analyzing string based on name word class">
+            <x:call function="rgx:analyze-string">
+                <x:param name="input" select="'abcABC'"/>
+                <x:param name="pattern" select="'\u{.b}'"/>
+            </x:call>
+            <x:expect label="Analyzing abcABC with \u{.b} leaves five child elements in the resultant &lt;analyze-string-result>">
+                <analyze-string-result xmlns="http://www.w3.org/2005/xpath-functions"
+                    xmlns:rgx="tag:textalign.net,2015:ns"
+                        ><non-match>a</non-match><match>b</match><non-match>cA</non-match><match>B</match><non-match>C</non-match></analyze-string-result>
+            </x:expect>
+        </x:scenario>
+        
+    </x:scenario>
+    
+    <x:scenario label="rgx:regex()">
+        <x:pending>
+            <!-- It's not possible, I think, to tell an XSpec scenario to expect an error -->
+            <x:scenario label="Simple expansion of regex \u{} with name, older version of Unicode">
+                <x:call function="rgx:regex">
+                    <x:param name="regex" select="$pattern-for-bubbles"/>
+                    <x:param name="version" select="6.0"/>
+                </x:call>
+                <x:expect label="\u{.bubbles} for Unicode 6.0 should be empty, and so an error should be thrown, not supported in XSpec" select="error()"/>
+            </x:scenario>
+        </x:pending>
+        <x:scenario label="Simple expansion of regex \u{} with name, older version of Unicode">
+            <x:call function="rgx:regex">
+                <x:param name="regex" select="$pattern-for-bottle"/>
+                <x:param name="version" select="6.0"/>
+            </x:call>
+            <x:expect label="\u{.bottle} for Unicode 6.0 should have two characters" select="'[🍶🍼]'"/>
+        </x:scenario>
+        <x:scenario label="Simple expansion of regex \u{} with name, latest Unicode">
+            <x:call function="rgx:regex">
+                <x:param name="regex" select="$pattern-for-bottle"/>
+            </x:call>
+            <x:expect label="\u{.bottle} for latest Unicode should have four characters" select="'[🍶🍼🍾🧴]'"/>
+        </x:scenario>
+        <x:scenario label="Greek letter patterns">
+            <x:call function="rgx:regex">
+                <x:param name="regex" select="$pattern-for-greek-accent"/>
+            </x:call>
+            <x:expect label="Pattern for an accented Greek letter"
+                select="'[̈́΄΅ΆΈΉΊΌΎΏΐάέήίΰόύώἄἅἌἍἔἕἜἝἤἥἬἭἴἵἼἽὄὅὌὍὔὕὝὤὥὬὭάέήίόύώᾄᾅᾌᾍᾔᾕᾜᾝᾤᾥᾬᾭᾴΆῄΈΉ῎ΐΊ῞ΰΎ΅ῴΌΏ´ἂἃἊἋἒἓἚἛἢἣἪἫἲἳἺἻὂὃὊὋὒὓὛὢὣὪὫὰὲὴὶὸὺὼᾂᾃᾊᾋᾒᾓᾚᾛᾢᾣᾪᾫᾲᾺῂῈῊ῍ῒῚ῝ῢῪ῭`ῲῸῺ͂ἆἇἎἏἦἧἮἯἶἷἾἿὖὗὟὦὧὮὯᾆᾇᾎᾏᾖᾗᾞᾟᾦᾧᾮᾯᾶᾷ῀῁ῆῇ῏ῖῗ῟ῦῧῶῷ]'"
+            />
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:parse-regex()">
+        <x:scenario label="Analysis of regular expression">
+            <x:call function="rgx:parse-regex">
+                <x:param name="regex" select="$pattern-for-bubbles"/>
+                <x:param name="version" select="6.0"/>
+            </x:call>
+            <x:expect label="\u{.bubbles} for Unicode 6.0 should be empty">
+                <results xmlns="tag:textalign.net,2015:ns"><open class="["
+                    level="1">[</open><escape class="u"
+                        level="1" /><close class="["
+                            level="1">]</close></results>
+            </x:expect>
+        </x:scenario>
+        <x:scenario label="Nested groups of regular expression">
+            <x:call function="rgx:parse-regex">
+                <x:param name="regex" select="'(' || $pattern-for-bottle || 'a(bc))'"/>
+                <x:param name="version" select="13.0"/>
+            </x:call>
+            <x:expect label="(\u{.bottle}|a(bc)) should have parsed results with several elements">
+                <results xmlns="tag:textalign.net,2015:ns"><open class="("
+                    level="1">(</open><open class="["
+                        level="2">[</open><escape class="u"
+                            level="2">🍶🍼🍾🧴</escape><close class="["
+                                level="2">]</close><regular level="1">a</regular><open class="("
+                                    level="2">(</open><regular level="2">bc</regular><close class="("
+                                        level="2">)</close><close class="("
+                                                level="1">)</close></results>
+            </x:expect>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:regex-is-valid()">
+        <x:scenario label="Bad regular expression">
+            <x:call function="rgx:regex-is-valid">
+                <x:param name="input-regex" select="'({'"/>
+            </x:call>
+            <x:expect label="'({' is a malformed regular expression" select="false()"/>
+        </x:scenario>
+        <x:scenario label="Good regular expression">
+            <x:call function="rgx:regex-is-valid">
+                <x:param name="input-regex" select="'(\{)'"/>
+            </x:call>
+            <x:expect label="'(\{)' is a valid regular expression" select="true()"/>
+        </x:scenario>
+        <x:scenario label="Malformed \u">
+            <x:call function="rgx:regex-is-valid">
+                <x:param name="input-regex" select="'\u{%}'"/>
+            </x:call>
+            <x:expect label="'\u{%}' is not a valid regular expression" select="false()"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <!-- The next two scenarios take longer than the others, so don't be surprised to see them commented out -->
+    <!--<x:scenario label="rgx:get-ucd-decomp-db()">
+        <x:scenario label="Get latest database for translating between base and composite characters">
+            <x:call function="rgx:get-ucd-decomp-db">
+            </x:call>
+            <x:expect label="Zero params gets latest version of decomp database" href="../ucd/ucd-decomp.13.0.xml"/>
+        </x:scenario>
+        <x:scenario label="Get versioned database for decomposing characters">
+            <x:call function="rgx:get-ucd-decomp-db">
+                <x:param name="version" select="5.1"/>
+            </x:call>
+            <x:expect label="Gets version 5.1 of decomp database" href="../ucd/ucd-decomp.5.1.xml"/>
+        </x:scenario>
+    </x:scenario>-->
+    
+    <!--<x:scenario label="rgx:get-ucd-names-db()">
+        <x:scenario label="Get latest database for the names of Unicode characters">
+            <x:call function="rgx:get-ucd-names-db"> </x:call>
+            <x:expect label="Zero params gets the latest version of ucd-names.xml" href="../ucd/ucd-names.13.0.xml"/>
+        </x:scenario>
+        <x:scenario label="Get versioned database for the names of Unicode characters">
+            <x:call function="rgx:get-ucd-names-db">
+                <x:param name="version" select="8.0"/>
+            </x:call>
+            <x:expect label="Gets version 8.0 of ucd-names.xml" href="../ucd/ucd-names.8.0.xml"/>
+        </x:scenario>
+    </x:scenario>-->
+    
+    <x:scenario label="rgx:string-base()">
+        <x:scenario label="Greek replacement">
+            <x:call function="rgx:string-base">
+                <x:param name="arg" select="'ἄνθρωπός'"/>
+            </x:call>
+            <x:expect label="ἀνθρὠπους - > ανθρωπους" select="'ανθρωπος'"/>
+        </x:scenario>
+        <x:scenario label="CJK Compatibility replacement">
+            <x:call function="rgx:string-base">
+                <x:param name="arg" select="'㍴'"/>
+            </x:call>
+            <x:expect label="㍴ - > bar" select="'㍴'"/>
+        </x:scenario>
+        <x:scenario label="Composites of b">
+            <x:call function="rgx:string-base">
+                <x:param name="arg" select="$composite-b-chars"/>
+            </x:call>
+            <x:expect
+                label="composite b's, mostly to b (but not ㍴, ㏔, and ㏝, which are complex and don't have singleton replacements)"
+                select="'bbbbbbb㍴㏔㏝bbbbbbbbbbbbbb'"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:string-to-components()">
+        <x:scenario label="simple string to components">
+            <x:call function="rgx:string-to-components">
+                <x:param name="arg" select="'㍴㏔㏝'"/>
+            </x:call>
+            <x:expect label="CJK characters ㍴㏔㏝ > bar, mb, Wb" select="'bar', 'mb', 'Wb'"/>
+        </x:scenario>
+        <x:scenario label="Greek string to components">
+            <x:call function="rgx:string-to-components">
+                <x:param name="arg" select="'ἄνθρωπός'"/>
+            </x:call>
+            <x:expect label="ἄνθρωπός > '#x3b1 x313 x301', 'ν', 'θ', 'ρ', 'ω', 'π', 'x3bf x301', 'ς'" select="'&#x3b1;&#x313;&#x301;', 'ν', 'θ', 'ρ', 'ω', 'π', '&#x3bf;&#x301;', 'ς'"/>
+        </x:scenario>
+    </x:scenario>
+
+    <x:scenario label="rgx:string-to-composites()">
+        <x:scenario label="single character to composites">
+            <x:call function="rgx:string-to-composites">
+                <x:param name="arg" select="'b'"/>
+            </x:call>
+            <x:expect label="'b' > 'bᵇḃḅḇ⒝ⓑ㍴㏔㏝ｂ𝐛𝑏𝒃𝒷𝓫𝔟𝕓𝖇𝖻𝗯𝘣𝙗𝚋'" select="$composite-b-chars"/>
+        </x:scenario>
+        <x:scenario label="string to composites">
+            <x:call function="rgx:string-to-composites">
+                <x:param name="arg" select="'b+ἄ🙋'"/>
+            </x:call>
+            <x:expect
+                label="'b ἄ🙋' > sequence of four strings: composites of b and U+0020 SPACE, and singletons ἄ and U+1F64B HAPPY PERSON RAISING ONE HAND"
+                select="$composite-b-chars, $composite-plus-chars, 'ἄ', '🙋'"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:codepoints-to-string()">
+        <x:scenario label="first 33 codepoints in XML 1.0">
+            <x:call function="rgx:codepoints-to-string">
+                <x:param name="arg" select="0 to 32"/>
+            </x:call>
+            <x:expect label="Only tab (9), end of line (10 = xA), carriage return (13 = xD), and space (32 = x20)" select="'&#x9;&#xA;&#xD;&#x20;'"/>
+        </x:scenario>
+        <x:pending label="XML 1.1 characters make Calabash XProc engine crash 🙁">
+            <x:scenario label="first 33 codepoints in XML 1.1">
+                <x:call function="rgx:codepoints-to-string">
+                    <x:param name="arg" select="0 to 32"/>
+                    <x:param name="xml-1-0" select="false()"/>
+                </x:call>
+                <x:expect label="Everything but null (x0)"
+                    select="'&#x1;&#x2;&#x3;&#x4;&#x5;&#x6;&#x7;&#x8;&#x9;&#xA;&#xB;&#xC;&#xD;&#xE;&#xF;&#x10;&#x11;&#x12;&#x13;&#x14;&#x15;&#x16;&#x17;&#x18;&#x19;&#x1A;&#x1B;&#x1C;&#x1D;&#x1E;&#x1F;&#x2;'"
+                />
+            </x:scenario>
+        </x:pending>
+    </x:scenario>
+    
+    <x:scenario label="rgx:process-regex-escape-u()">
+        <x:scenario label="Hex values">
+            <x:call function="rgx:process-regex-escape-u">
+                <x:param name="val-inside-braces" select="'4d-4f, 51'"/>
+            </x:call>
+            <x:expect label="4d-4f, 51 > entities, no spaces or commas" select="'&#x4d;-&#x4f;&#x51;'"/>
+        </x:scenario>
+        <x:scenario label="Expansion to composites">
+            <x:call function="rgx:process-regex-escape-u">
+                <x:param name="val-inside-braces" select="'+b'"/>
+            </x:call>
+            <x:expect label="+b > composite b characters" select="$composite-b-chars"/>
+        </x:scenario>
+        <x:scenario label="Reduction to base forms">
+            <x:call function="rgx:process-regex-escape-u">
+                <x:param name="val-inside-braces" select="'-ḉ'"/>
+            </x:call>
+            <x:expect label="'-ḉ' > 'c'" select="'c'"/>
+        </x:scenario>
+        <x:scenario label="Chained name keywords: Greek">
+            <x:call function="rgx:process-regex-escape-u">
+                <x:param name="val-inside-braces" select="'.greek.capital.perispomeni'"/>
+            </x:call>
+            <x:expect label="'.greek.capital.perispomeni' > 'ἎἏἮἯἾἿὟὮὯᾎᾏᾞᾟᾮᾯ'" select="'ἎἏἮἯἾἿὟὮὯᾎᾏᾞᾟᾮᾯ'"/>
+        </x:scenario>
+        <x:scenario label="Chained name keywords: Latin">
+            <x:call function="rgx:process-regex-escape-u">
+                <x:param name="val-inside-braces" select="'.latin.cedilla'"/>
+            </x:call>
+            <x:expect label="'.latin.cedilla' > 'ÇçĢģĶķĻļŅņŖŗŞşŢţȨȩᷗḈḉḐḑḜḝḨḩ'" select="'ÇçĢģĶķĻļŅņŖŗŞşŢţȨȩᷗḈḉḐḑḜḝḨḩ'"/>
+        </x:scenario>
+        <x:scenario label="Chained name keywords: Ms that are not small, capital, or Latin">
+            <x:call function="rgx:process-regex-escape-u">
+                <x:param name="val-inside-braces" select="'.m!small!capital!latin'"/>
+            </x:call>
+            <x:expect label="'.m!small!capital!latin' > 'ൔᒻᒼᒾᒿᛗᛘᛙᣘᧄᮿᰮㄇ㎛㎡㎥㎧㎨㏁㏞㏟ꚳꩌ𐊎𐊪𐤪𑪐𑫟𖥑𖨑𛰏𛰙𛰝𛰞𛰟𛰡𛰧𛰫𛰬𛰭𛰼𛱪🇲'" select="'ൔᒻᒼᒾᒿᛗᛘᛙᣘᧄᮿᰮㄇ㎛㎡㎥㎧㎨㏁㏞㏟ꚳꩌ𐊎𐊪𐤪𑪐𑫟𖥑𖨑𛰏𛰙𛰝𛰞𛰟𛰡𛰧𛰫𛰬𛰭𛰼𛱪🇲'"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:get-chars-by-name()">
+        <x:scenario label="Simple query">
+            <x:call function="rgx:get-chars-by-name">
+                <x:param name="words-in-name" select="'SUPERSCRIPT', 'ThReE'"/>
+                <x:param name="words-not-in-name" select="''"/>
+                <x:param name="version" select="11.0"/>
+            </x:call>
+            <x:expect label="SUPERSCRIPT ThReE: 1 element (input case doesn't matter)"><char cp="00B3" val="³" xmlns="tag:textalign.net,2015:ns"
+                            ><na><n>superscript</n><n>three</n></na></char></x:expect>
+        </x:scenario>
+        <x:scenario label=". and ! filters">
+            <x:call function="rgx:get-chars-by-name">
+                <x:param name="words-in-name" select="'suspension', 'mark'"/>
+                <x:param name="words-not-in-name" select="'combining'"/>
+                <x:param name="version" select="13.0"/>
+            </x:call>
+            <x:expect label=".suspension.mark!combining: 1 element"><char cp="2E44" val="⹄"
+                    xmlns="tag:textalign.net,2015:ns"
+                        ><na><n>double</n><n>suspension</n><n>mark</n></na></char></x:expect>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="rgx:replace-by-char-name()">
+        <x:scenario label="Latin accents">
+            <x:call function="rgx:replace-by-char-name">
+                <x:param name="string-to-replace" select="'áéíóúώ'"/>
+                <x:param name="words-in-name-to-drop" select="'acute'"/>
+                <x:param name="words-in-replacement-char-name" select="'circumflex'"/>
+                <x:param name="words-not-in-replacement-char-name" select="''"/>
+                <x:param name="search-is-strict" select="true()"/>
+            </x:call>
+            <x:expect label="Acute accents to circumflexes: 'áéíóú' > 'âêîôû'" select="'âêîôûώ'"/>
+        </x:scenario>
+        <x:scenario label="Greek accents">
+            <x:call function="rgx:replace-by-char-name">
+                <x:param name="string-to-replace" select="'ἃ Ἃ Ὅ ὥ ᾝ ᾓ ᾃ'"/>
+                <x:param name="words-in-name-to-drop" select="'dasia'"/>
+                <x:param name="words-in-replacement-char-name" select="'psili'"/>
+                <x:param name="words-not-in-replacement-char-name" select="''"/>
+                <x:param name="search-is-strict" select="true()"/>
+            </x:call>
+            <x:expect
+                label="Greek rough breathings (DASIA) to smooth (PSILI): 'ἃ Ἃ Ὅ ὥ ᾝ ᾓ ᾃ' > 'ἂ Ἂ Ὄ ὤ ᾜ ᾒ ᾂ' "
+                select="'ἂ Ἂ Ὄ ὤ ᾜ ᾒ ᾂ'"/>
+        </x:scenario>
+        <x:scenario label="Greek accents">
+            <x:call function="rgx:replace-by-char-name">
+                <x:param name="string-to-replace" select="'ἀδελφὲ ἀπὸ τοῦ πονηροῦ.'"/>
+                <x:param name="words-in-name-to-drop" select="'varia'"/>
+                <x:param name="words-in-replacement-char-name" select="'oxia'"/>
+                <x:param name="words-not-in-replacement-char-name" select="''"/>
+                <x:param name="search-is-strict" select="true()"/>
+            </x:call>
+            <x:expect label="ἀδελφὲ ἀπὸ τοῦ πονηροῦ. > " select="'ἀδελφέ ἀπό τοῦ πονηροῦ.'"/>
+        </x:scenario>
+    </x:scenario>
+    
+    <x:scenario label="numbers: converting base systems">
+        <x:scenario label="rgx:dec-to-hex()">
+            <x:call function="rgx:dec-to-hex">
+                <x:param name="in" select="32"/>
+            </x:call>
+            <x:expect label="32 > 20" select="'20'"/>
+        </x:scenario>
+        <x:scenario label="rgx:hex-to-dec()">
+            <x:call function="rgx:hex-to-dec">
+                <x:param name="hex" select="'1FAB'"/>
+            </x:call>
+            <x:expect label="hex 1FAB > 8107" select="8107"/>
+        </x:scenario>
+        <x:scenario label="rgx:dec-to-n()">
+            <x:call function="rgx:dec-to-n">
+                <x:param name="in" select="8"/>
+                <x:param name="base" select="2"/>
+            </x:call>
+            <x:expect label="8 > base 2 = 100" select="'1000'"/>
+        </x:scenario>
+        <x:scenario label="rgx:dec-to-n()">
+            <x:call function="rgx:dec-to-n">
+                <x:param name="in" select="2117"/>
+                <x:param name="base" select="13"/>
+            </x:call>
+            <x:expect label="2117 > base 13 = 126B" select="'126B'"/>
+        </x:scenario>
+        <x:scenario label="rgx:n-to-dec()">
+            <x:call function="rgx:n-to-dec">
+                <x:param name="input" select="'abc23'"/>
+                <x:param name="base-n" select="16"/>
+            </x:call>
+            <x:expect label="'abc23' hex = 703523 decimal'" select="703523"/>
+        </x:scenario>
+        
+    </x:scenario>
+    
+</x:description>
