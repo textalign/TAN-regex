@@ -1,6 +1,6 @@
 A Unicode-Based Extension to XPath functions that use regular expressions.
 
-Functions `rgx:matches()`, `rgx:replace()`, `rgx:tokenize()`, `rgx:analyze-string()` (in the TAN namespace, tan:textalign.net,2015:ns) behave exactly like the standard functions (namespace http://www.w3.org/2005/xpath-functions) but permit the escape character `\u{}`, which takes four types of constructions.
+Functions `rgx:matches()`, `rgx:replace()`, `rgx:tokenize()`, `rgx:analyze-string()` (in the TAN namespace, `tan:textalign.net,2015:ns`) behave exactly like the standard functions (namespace `http://www.w3.org/2005/xpath-functions`) but permit the escape character `\u{}`, which takes four types of constructions.
 
 1. hexadecimal codepoints, e.g., `\u{3f-4a, 1faa}`.
 1. Unicode name words, e.g., `\u{.omega!greek}` (any Unicode character whose name includes the word "OMEGA" but not the word "GREEK").
