@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8"?>
-<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec"
+<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec" xmlns:err="http://www.w3.org/2005/xqt-errors"
     xmlns:rgx="tag:textalign.net,2015:ns" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    stylesheet="file:/E:/Joel/Dropbox/TAN/TAN-2020/functions/regex/regex-ext-tan-functions.xsl">
+    stylesheet="../regex-ext-tan-functions.xsl">
     
     <x:variable name="text-with-bubbles" select="'🗪 U+1F5EA TWO SPEECH BUBBLES'"/>
     <x:variable name="pattern-for-bubbles" select="'\u{.bubbles}'"/>
@@ -64,19 +64,20 @@
             </x:call>
             <x:expect label="'A' matches \u{61} (= 'a') with flag 'i'" select="true()"/>
         </x:scenario>
-        <x:pending>
-            <!-- This should throw an error, but XSpec doesn't support expectations of a thrown error -->
-            <x:scenario label="Simple match on \u{} + name based on older Unicode version">
-                <x:call function="rgx:matches">
-                    <x:param name="input" select="$text-with-bubbles"/>
-                    <x:param name="pattern" select="$pattern-for-bubbles"/>
-                    <x:param name="flags" select="'6.0'"/>
-                </x:call>
-                <x:expect
-                    label="U+1F5EA TWO SPEECH BUBBLES doesn't match \u{.bubbles} in Unicode version 6.0 because 'BUBBLES' was introduced only in 7.0"
-                    select="false()"/>
-            </x:scenario>
-        </x:pending>
+        
+        <x:scenario catch="true" label="Simple match on \u{} + name based on older Unicode version">
+            <x:call function="rgx:matches">
+                <x:param name="input" select="$text-with-bubbles"/>
+                <x:param name="pattern" select="$pattern-for-bubbles"/>
+                <x:param name="flags" select="'6.0'"/>
+            </x:call>
+            <x:expect
+                label="U+1F5EA TWO SPEECH BUBBLES doesn't match \u{.bubbles} in Unicode version 6.0 because 'BUBBLES' was introduced only in 7.0"
+                test="$x:result?err?code"
+                select="xs:QName('err:FORX0002')"/>
+            
+        </x:scenario>
+        
         <x:scenario label="Greek words with two accents">
             <x:call function="rgx:matches">
                 <x:param name="input" select="'σῶσόν με'"/>
@@ -156,16 +157,18 @@
     </x:scenario>
     
     <x:scenario label="rgx:regex()">
-        <x:pending>
-            <!-- It's not possible, I think, to tell an XSpec scenario to expect an error -->
-            <x:scenario label="Simple expansion of regex \u{} with name, older version of Unicode">
-                <x:call function="rgx:regex">
-                    <x:param name="regex" select="$pattern-for-bubbles"/>
-                    <x:param name="version" select="6.0"/>
-                </x:call>
-                <x:expect label="\u{.bubbles} for Unicode 6.0 should be empty, and so an error should be thrown, not supported in XSpec" select="error()"/>
-            </x:scenario>
-        </x:pending>
+        
+        <x:scenario catch="true"
+            label="Simple expansion of regex \u{} with name, older version of Unicode">
+            <x:call function="rgx:regex">
+                <x:param name="regex" select="$pattern-for-bubbles"/>
+                <x:param name="version" select="6.0"/>
+            </x:call>
+            <x:expect
+                label="\u{.bubbles} for Unicode 6.0 should be empty, and so an error should be thrown"
+                select="'[]'"/>
+        </x:scenario>
+        
         <x:scenario label="Simple expansion of regex \u{} with name, older version of Unicode">
             <x:call function="rgx:regex">
                 <x:param name="regex" select="$pattern-for-bottle"/>
@@ -331,17 +334,18 @@
             </x:call>
             <x:expect label="Only tab (9), end of line (10 = xA), carriage return (13 = xD), and space (32 = x20)" select="'&#x9;&#xA;&#xD;&#x20;'"/>
         </x:scenario>
-        <x:pending label="XML 1.1 characters make Calabash XProc engine crash 🙁">
-            <x:scenario label="first 33 codepoints in XML 1.1">
-                <x:call function="rgx:codepoints-to-string">
-                    <x:param name="arg" select="0 to 32"/>
-                    <x:param name="xml-1-0" select="false()"/>
-                </x:call>
-                <x:expect label="Everything but null (x0)"
-                    select="'&#x1;&#x2;&#x3;&#x4;&#x5;&#x6;&#x7;&#x8;&#x9;&#xA;&#xB;&#xC;&#xD;&#xE;&#xF;&#x10;&#x11;&#x12;&#x13;&#x14;&#x15;&#x16;&#x17;&#x18;&#x19;&#x1A;&#x1B;&#x1C;&#x1D;&#x1E;&#x1F;&#x2;'"
-                />
-            </x:scenario>
-        </x:pending>
+        
+        <!-- XML 1.1 characters make Calabash XProc engine crash 🙁 -->
+        <x:scenario label="first 33 codepoints in XML 1.1">
+            <x:call function="rgx:codepoints-to-string">
+                <x:param name="arg" select="1 to 32"/>
+                <x:param name="xml-1-0" select="false()"/>
+            </x:call>
+            <x:expect label="Everything but null (x0)"
+                select="'&#x1;&#x2;&#x3;&#x4;&#x5;&#x6;&#x7;&#x8;&#x9;&#xA;&#xB;&#xC;&#xD;&#xE;&#xF;&#x10;&#x11;&#x12;&#x13;&#x14;&#x15;&#x16;&#x17;&#x18;&#x19;&#x1A;&#x1B;&#x1C;&#x1D;&#x1E;&#x1F;&#x2;'"
+            />
+        </x:scenario>
+        
     </x:scenario>
     
     <x:scenario label="rgx:process-regex-escape-u()">
