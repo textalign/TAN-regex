@@ -471,32 +471,13 @@
                         satisfies * = $j)]]"
         />
     </xsl:function>
-
-    <xsl:function name="rgx:replace-by-char-name" as="xs:string?">
-        <!-- five-parameter version of the full function, below -->
-        <xsl:param name="string-to-replace" as="xs:string?"/>
-        <xsl:param name="words-in-name-to-drop" as="xs:string*"/>
-        <xsl:param name="words-in-replacement-char-name" as="xs:string*"/>
-        <xsl:param name="words-not-in-replacement-char-name" as="xs:string*"/>
-        <xsl:param name="search-is-strict" as="xs:boolean?"/>
-        <xsl:sequence
-            select="rgx:replace-by-char-name($string-to-replace, $words-in-name-to-drop, $words-in-replacement-char-name, $words-not-in-replacement-char-name, $search-is-strict, $default-unicode-version)"
-        />
-    </xsl:function>
-
-    <xsl:function name="rgx:replace-by-char-name" as="xs:string?">
-        <!-- Input: a string to be changed; three sets of strings; a boolean -->
-        <!-- Output: the string with characters replaced according to the rules below -->
-        <!-- This function was written primarily to transform Greek letters, e.g., acutes into graves -->
-        <!-- The first input is broken into individual characters. Each character's Unicode name words 
-            are returned. Any names found in the first set of strings are removed. rgx:get-chars-by-name() 
-            is invoked to find replacement characters -->
-        <!-- If the boolean is false, then the search will return unicode codepoints that might have other 
-            words in their name; otherwise the match must correspond to all words in the target name -->
-        <!-- If the analysis of a character results in no hits from rgx:get-chars-by-name() then the original
-            character is returned -->
-        <!-- The process will be applied to only the first name found, not aliases -->
-        <xsl:param name="string-to-replace" as="xs:string?"/>
+    
+    <xsl:function name="rgx:build-char-replacement-guide" as="element()">
+        <!-- Input: three sequences of strings; a boolean (whether matches should be strict); a double (Unicode version) -->
+        <!-- Output: an XML tree rgx:replace/rgx:char/rgx:with specifying that every rgx:char/@val should be replaced
+            by a string-joining of its rgx:with/@val. -->
+        <!-- This function should be used to optimize replacement through a global variable. See documentation at 
+            rgx:replace-by-char-name(), which this function supports.  -->
         <xsl:param name="words-in-name-to-drop" as="xs:string*"/>
         <xsl:param name="words-in-replacement-char-name" as="xs:string*"/>
         <xsl:param name="words-not-in-replacement-char-name" as="xs:string*"/>
@@ -509,33 +490,112 @@
                 else
                     rgx:get-ucd-names-db($version)"
         />
+        <xsl:variable name="p1-norm"
+            select="
+                for $i in $words-in-name-to-drop
+                return
+                    lower-case($i)"
+        />
+        <xsl:variable name="p2-norm"
+            select="
+                for $i in $words-in-replacement-char-name
+                return
+                    lower-case($i)"
+        />
+        <xsl:variable name="p3-norm"
+            select="
+                for $i in $words-not-in-replacement-char-name
+                return
+                    lower-case($i)"
+        />
+        <xsl:variable name="relevant-db-entries" select="$unicode-names-db/rgx:ucd/rgx:char[*/* = $p1-norm]"/>
+        <replace>
+            <xsl:for-each select="$relevant-db-entries">
+                <xsl:variable name="this-na-or-alias" select="*[rgx:n = $p1-norm]"/>
+                <xsl:variable name="these-name-words" select="$this-na-or-alias/rgx:n[not(. = $p1-norm)]"/>
+                <xsl:variable name="replacements"
+                    select="rgx:get-chars-by-name(($these-name-words, $p2-norm), $p3-norm, $version)"/>
+                <xsl:variable name="replacements-culled"
+                    select="
+                        if ($search-is-strict = true()) then
+                            $replacements[*[every $i in rgx:n
+                                satisfies $i = ($these-name-words, $words-in-replacement-char-name)]]
+                        else
+                            $replacements"
+                />
+                <xsl:if test="exists($replacements-culled)">
+                    <xsl:copy>
+                        <xsl:copy-of select="@*"/>
+                        <xsl:for-each select="$replacements-culled">
+                            <with>
+                                <xsl:copy-of select="@*"/>
+                            </with>
+                        </xsl:for-each>
+                    </xsl:copy>
+                </xsl:if>
+            </xsl:for-each>
+        </replace>
+    </xsl:function>
+
+    <xsl:function name="rgx:replace-by-char-name" as="xs:string?">
+        <!-- five-parameter version of the full function, below -->
+        <xsl:param name="string-to-replace" as="xs:string?"/>
+        <xsl:param name="words-in-name-to-drop" as="xs:string*"/>
+        <xsl:param name="words-in-replacement-char-name" as="xs:string*"/>
+        <xsl:param name="words-not-in-replacement-char-name" as="xs:string*"/>
+        <xsl:param name="search-is-strict" as="xs:boolean?"/>
+        <xsl:sequence
+            select="rgx:replace-by-char-name($string-to-replace, $words-in-name-to-drop, $words-in-replacement-char-name, $words-not-in-replacement-char-name, $search-is-strict, $default-unicode-version)"
+        />
+    </xsl:function>
+    <xsl:function name="rgx:replace-by-char-name" as="xs:string?">
+        <!-- five-parameter version of the full function, below -->
+        <xsl:param name="string-to-replace" as="xs:string?"/>
+        <xsl:param name="words-in-name-to-drop" as="xs:string*"/>
+        <xsl:param name="words-in-replacement-char-name" as="xs:string*"/>
+        <xsl:param name="words-not-in-replacement-char-name" as="xs:string*"/>
+        <xsl:param name="search-is-strict" as="xs:boolean?"/>
+        <xsl:param name="version" as="xs:double"/>
+        <xsl:variable name="this-replace-guide" as="element()"
+            select="rgx:build-char-replacement-guide($words-in-name-to-drop, $words-in-replacement-char-name, $words-not-in-replacement-char-name, $search-is-strict, $version)"/>
+        
+        <xsl:sequence
+            select="rgx:replace-by-char-name($string-to-replace, $this-replace-guide)"
+        />
+    </xsl:function>
+
+    <xsl:function name="rgx:replace-by-char-name" as="xs:string?">
+        <!-- Input: a string to be changed; three sets of strings; a boolean -->
+        <!-- Output: the string with characters replaced according to the rules below -->
+        <!-- This function was written primarily to transform Greek letters, e.g., to change graves into acutes -->
+        <!-- The input string is broken into individual characters. Focus is placed on only those characters whose Unicode name 
+            has words matching $words-in-name-to-drop. Other words in the first matching name are retained, and a search is made
+            for any other Unicode character that has names specified by $words-in-replacement-char-name and does
+            not have words specified by $words-not-in-replacement-char-name. -->
+        <!-- If the boolean is false, then the search will return unicode codepoints that might have other 
+            words in their name; otherwise the match must correspond to all words in the target name -->
+        <!-- If the character does not have an entry in the $replace-guide, the original
+            character is returned -->
+        <!-- The process will be applied to a char against only the first name found, not aliases -->
+        <!-- To use this function optimally, first bind a replacement guide to a global variable, using rgx:build-char-replacement-guide(),
+        then use the 2-parameter version of this function. -->
+        <xsl:param name="string-to-replace" as="xs:string?"/>
+        <xsl:param name="replace-guide" as="element(rgx:replace)"/>
+        
+        <xsl:variable name="these-cps" select="string-to-codepoints($string-to-replace)"/>
         <xsl:variable name="output" as="xs:string*">
-            <xsl:analyze-string select="$string-to-replace" regex=".">
-                <xsl:matching-substring>
-                    <xsl:variable name="this-code" select="."/>
-                    <xsl:variable name="unicode-db-entry"
-                        select="$unicode-names-db/rgx:ucd/rgx:char[@val = $this-code]"/>
-                    <xsl:variable name="this-name-words"
-                        select="$unicode-db-entry/*[1]/rgx:n[not(. = $words-in-name-to-drop)]"/>
-                    <xsl:variable name="replacements"
-                        select="rgx:get-chars-by-name(($this-name-words, $words-in-replacement-char-name), $words-not-in-replacement-char-name, $version)"/>
-                    <xsl:variable name="replacements-culled"
-                        select="
-                            if ($search-is-strict = true()) then
-                                $replacements[*[every $i in rgx:n
-                                    satisfies $i = ($this-name-words, $words-in-replacement-char-name)]]
-                            else
-                                $replacements"/>
-                    <xsl:choose>
-                        <xsl:when test="not(exists($replacements-culled))">
-                            <xsl:value-of select="."/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:sequence select="string-join($replacements-culled/@val)"/>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                </xsl:matching-substring>
-            </xsl:analyze-string>
+            <xsl:for-each select="$these-cps">
+                <xsl:variable name="this-val" select="codepoints-to-string(.)"/>
+                <xsl:variable name="this-entry" select="$replace-guide/rgx:char[@val = $this-val]"/>
+                <xsl:choose>
+                    <xsl:when test="exists($this-entry)">
+                        <xsl:value-of select="string-join($this-entry/rgx:with/@val)"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="$this-val"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each>
         </xsl:variable>
         <xsl:sequence select="string-join($output)"/>
     </xsl:function>
@@ -551,7 +611,14 @@
         <!-- Output: the regular expression adjusted according to TAN-regex rules -->
         <xsl:param name="regex" as="xs:string?"/>
         <xsl:param name="version" as="xs:double"/>
-        <xsl:value-of select="rgx:parse-regex($regex, $version)"/>
+        <xsl:choose>
+            <xsl:when test="matches($regex, '\\u')">
+                <xsl:value-of select="rgx:parse-regex($regex, $version)"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:sequence select="$regex"/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:function>
     
     <xsl:function name="rgx:parse-regex" as="element()">
