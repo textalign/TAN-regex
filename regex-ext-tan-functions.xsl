@@ -39,8 +39,8 @@
     <xsl:variable name="open-group-symbols-regex">[\[\(\{]</xsl:variable>
     <xsl:variable name="close-group-symbols-regex">[\]\)\}]</xsl:variable>
 
-    <!-- characters used to delimit items within \u{}, currently the space and the comma -->
-    <xsl:variable name="u-item-delimiter-regex" select="' |,'"/>
+    <!-- characters used to delimit items within \u{}, currently the space -->
+    <xsl:variable name="u-item-delimiter-regex" select="' '"/>
     <!-- characters used in the official Unicode character names -->
     <xsl:variable name="characters-allowed-in-ucd-names-regex" select="'[-#\(\)a-zA-Z0-9]'"/>
     <!-- characters used to chain Unicode character name words within a {} escape class, currently restricted to . and ! -->
@@ -371,9 +371,8 @@
         <xsl:param name="val-inside-braces" as="xs:string"/>
         <xsl:param name="version" as="xs:double"/>
         
-        <!-- first normalize spacing around the hyphen and comma, then tokenize on commas and spaces -->
-        <xsl:variable name="val-normalized"
-            select="replace(normalize-space($val-inside-braces), ' ?([-,]) ?', '$1')"/>
+        <!-- first normalize spacing around the hyphen and comma, then tokenize on spaces -->
+        <xsl:variable name="val-normalized" select="normalize-space($val-inside-braces)"/>
         <xsl:variable name="val-parts" as="xs:string*" select="tokenize($val-normalized, $u-item-delimiter-regex)"/>
         <xsl:variable name="val-parts-analyzed" as="xs:string*">
             <xsl:for-each select="$val-parts">
