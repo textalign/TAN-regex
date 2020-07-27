@@ -605,7 +605,7 @@
         <xsl:sequence select="rgx:regex($regex, $default-unicode-version)"/>
     </xsl:function>
 
-    <xsl:function name="rgx:regex" as="xs:string?">
+    <xsl:function name="rgx:regex" as="xs:string?" cache="yes">
         <!-- Input: string representing a regex pattern -->
         <!-- Output: the regular expression adjusted according to TAN-regex rules -->
         <xsl:param name="regex" as="xs:string?"/>
@@ -620,7 +620,7 @@
         </xsl:choose>
     </xsl:function>
     
-    <xsl:function name="rgx:parse-regex" as="element()">
+    <xsl:function name="rgx:parse-regex" as="element()" cache="yes">
         <!-- Input: a regular expression -->
         <!-- Output: an element with the regular expression parsed -->
         <!-- Any errors are embedded as <error>s -->
