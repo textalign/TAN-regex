@@ -26,8 +26,6 @@
         </xsl:choose>
     </xsl:function>
 
-    <xsl:variable name="esc-seq" select="'\\u\{?([^\}]*)\}?'"/>
-
     <!-- this is a regular expression pattern for characters in a string that should be prefaced with \ when converting to a regular expression -->
     <xsl:variable name="characters-to-escape-when-converting-string-to-regex" as="xs:string"
         select="'[\.\[\]\\\|\^\$\?\*\+\{\}\(\)]'"/>
@@ -90,7 +88,7 @@
         <xsl:sequence select="rgx:matches($input, $pattern, '')"/>
     </xsl:function>
     <xsl:function name="rgx:matches" as="xs:boolean">
-        <!-- Parallel to fn:matches(), but converts TAN-exceptions into classes. See rgx:regex() for details. -->
+        <!-- Parallel to fn:matches(), but converts \u{} into classes. See rgx:regex() for details. -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="flags" as="xs:string"/>
@@ -113,7 +111,7 @@
         <xsl:sequence select="rgx:replace($input, $pattern, $replacement, '')"/>
     </xsl:function>
     <xsl:function name="rgx:replace" as="xs:string">
-        <!-- Parallel to fn:replace(), but converts TAN-exceptions into classes. See rgx:regex() for details. -->
+        <!-- Parallel to fn:replace(), but converts \u{} into classes. See rgx:regex() for details. -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="replacement" as="xs:string"/>
@@ -136,7 +134,7 @@
         <xsl:sequence select="rgx:tokenize($input, $pattern, '')"/>
     </xsl:function>
     <xsl:function name="rgx:tokenize" as="xs:string*">
-        <!-- Parallel to fn:tokenize(), but converts TAN-exceptions into classes. See rgx:regex() for details. -->
+        <!-- Parallel to fn:tokenize(), but converts \u{} into classes. See rgx:regex() for details. -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="flags" as="xs:string"/>
@@ -219,8 +217,6 @@
     </xsl:function>
     
     
-    <xsl:variable name="key-gc-vals" as="xs:string+" select="'Lu', 'Ll', 'Lt', 'Lo', 'Nd', 'Nl', 'No', 'Sm', 'Sc', 'Sk', 'So'"/>
-    
     <xsl:function name="rgx:string-base" as="xs:string?">
         <!-- one-param version of the fuller one, below -->
         <xsl:param name="arg" as="xs:string?"/>
@@ -235,7 +231,7 @@
       This function is similar to rgx:string-to-components(), but strictly enforces a one-for-one replacement,
       so that it behaves much like fn:lower-case() and fn:upper-case(), where the string length is always preserved.
       To this end, this function is based on fn:translate(), and uses simple decomposition databases, which are much 
-      smaller and quicker to use than are full decomoposition databases.
+      smaller and quicker to use than are full decomposition databases.
       The strict one-for-one replacement observes the following rules:
           If a character decomposes to a single character, that single character is returned.
           If a character decomposes to multiple characters that are identical, that single character is returned, e.g., ‴ to ′
@@ -244,7 +240,7 @@
           - Non-base characters: \p{Lm}\p{M}\p{P}\p{Z}\p{C}
           If after non-base characters are removed there is not exactly one unique decomposed character left, the original input is retained.
         The above rules are already reflected in the contents of the simple decomposition database, so do not need to be 
-        expressed in this function. -->
+        expressed in this function. For more, see ucd/ucd-decomp.xsl. -->
 
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:param name="version" as="xs:double"/>
@@ -260,12 +256,12 @@
         <xsl:sequence select="rgx:string-to-components($arg, $default-unicode-version)"/>
     </xsl:function>
     <xsl:function name="rgx:string-to-components" as="xs:string*">
-        <!-- Input: any string; a Unicode version number -->
+        <!-- Input: any string; a Unicode version number. -->
         <!-- Output: one string per character in the input; if a character lends itself to decomposition, its component parts are 
-        returned, otherwise the character itself is returned -->
-        <!-- This function is the inverse of rgx:string-to-composites -->
+        returned, otherwise the character itself is returned. -->
+        <!-- This function is the inverse of rgx:string-to-composites(). -->
         <!-- If you wish to have more control over which components are returned (e.g., exclusion of combining marks), consider
-        using either rgx:string-base() or use the database directly: rgx:get-ucd-decomp-db(). The each rgx:char/rgx:b has @gc
+        using either rgx:string-base() or the database directly: rgx:get-ucd-decomp-db(). The each rgx:char/rgx:b has @gc
         with the code for the component's general category -->
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:param name="version" as="xs:double"/>
@@ -361,9 +357,7 @@
         <!-- '+b' > 'bᵇḃḅḇ⒝ⓑ㍴㏔㏝ｂ𝐛𝑏𝒃𝒷𝓫𝔟𝕓𝖇𝖻𝗯𝘣𝙗𝚋' -->
         <!-- 3. Base signal: - followed by a string -->
         <!-- '-ḉ' > 'c' -->
-        <!-- 4. name keywords: chains of . or ! followed by a string -->
-        <!-- 3. Words chained by preceding periods or exclamation marks. The expression will by replaced by Unicode characters 
-            whose names match every . word no ! words-->
+        <!-- 4. name keywords: chains of . or ! each followed by a string -->
         <!-- '.greek.capital.perispomeni' > 'ἎἏἮἯἾἿὟὮὯᾎᾏᾞᾟᾮᾯ'
         .latin.cedilla - - > 'ÇçĢģĶķĻļŅņŖŗŞşŢţȨȩᷗḈḉḐḑḜḝḨḩ'
         .m!small - - > 'MƜൔᒻᒼᒾᒿᛗᛘᛙᣘᧄᮿᰮᴹḾṀṂℳⓂⱮㄇ㎛㎡㎥㎧㎨㏁㏞㏟ꚳꟽꟿꩌＭ'  -->
@@ -571,12 +565,12 @@
             has words matching $words-in-name-to-drop. Other words in the first matching name are retained, and a search is made
             for any other Unicode character that has names specified by $words-in-replacement-char-name and does
             not have words specified by $words-not-in-replacement-char-name. -->
-        <!-- If the boolean is false, then the search will return unicode codepoints that might have other 
-            words in their name; otherwise the match must correspond to all words in the target name -->
+        <!-- If the boolean is false, then the search will return Unicode codepoints that might have other 
+            words in their name; otherwise the match must correspond to all words in the target name. -->
         <!-- If the character does not have an entry in the $replace-guide, the original
-            character is returned -->
-        <!-- The process will be applied to a char against only the first name found, not aliases -->
-        <!-- To use this function optimally, first bind a replacement guide to a global variable, using rgx:build-char-replacement-guide(),
+            character is returned. -->
+        <!-- The process will be applied to a char against only the first name found, not aliases. -->
+        <!-- To use this function optimally, first bind the second parameter to a global variable, using rgx:build-char-replacement-guide(),
         then use the 2-parameter version of this function. -->
         <xsl:param name="string-to-replace" as="xs:string?"/>
         <xsl:param name="replace-guide" as="element(rgx:replace)"/>

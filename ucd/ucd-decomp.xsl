@@ -139,6 +139,7 @@
         <xsl:apply-templates select="$ucd-decomp-database" mode="build-ucd-decomp-simple"/>
     </xsl:variable>
     
+    <xsl:variable name="key-gc-vals" as="xs:string+" select="('Lu', 'Ll', 'Lt', 'Lo', 'Nd', 'Nl', 'No', 'Sm', 'Sc', 'Sk', 'So')"/>
     <xsl:template match="/*" mode="build-ucd-decomp-simple">
         <!-- For annotations on the rationale for identifying relevant chars, see rgx:string-base() -->
         <xsl:variable name="relevant-chars" as="element()+">
