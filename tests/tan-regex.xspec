@@ -59,7 +59,7 @@
         <x:scenario label="Simple match with \u{} + hex range">
             <x:call function="rgx:matches">
                 <x:param name="input" select="'ABC'"/>
-                <x:param name="pattern" select="'\u{24-26, 5f-61}'"/>
+                <x:param name="pattern" select="'\u{24-26 5f-61}'"/>
                 <x:param name="flags" select="'i'"/>
             </x:call>
             <x:expect label="'A' matches \u{61} (= 'a') with flag 'i'" select="true()"/>
@@ -234,7 +234,7 @@
             <x:call function="rgx:regex-is-valid">
                 <x:param name="input-regex" select="'(\{)'"/>
             </x:call>
-            <x:expect label="'(\{)' is a valid regular expression" select="true()"/>
+            <x:expect label="Valid regular expression" select="true()"/>
         </x:scenario>
         <x:scenario label="Malformed \u">
             <x:call function="rgx:regex-is-valid">
@@ -349,7 +349,7 @@
     <x:scenario label="rgx:process-regex-escape-u()">
         <x:scenario label="Hex values">
             <x:call function="rgx:process-regex-escape-u">
-                <x:param name="val-inside-braces" select="'4d-4f, 51'"/>
+                <x:param name="val-inside-braces" select="'4d-4f 51'"/>
             </x:call>
             <x:expect label="4d-4f, 51 > entities, no spaces or commas" select="'&#x4d;-&#x4f;&#x51;'"/>
         </x:scenario>
