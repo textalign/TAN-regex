@@ -6,6 +6,8 @@
     
     <xsl:param name="default-unicode-version" as="xs:double" select="13.0"/>
     
+    <xsl:variable name="TAN-regex-version" as="xs:double" select="1.0"/>
+    
     <xsl:variable name="unicode-versions-supported" as="xs:double+"
         select="5.1, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0"/>
     <xsl:function name="rgx:best-unicode-version" as="xs:double">

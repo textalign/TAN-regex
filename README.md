@@ -1,5 +1,7 @@
 # TAN-regex
 
+Version 1.0
+
 TAN-regex is an XSLT library that extends regular expressions used by XPath functions `matches()`, `replace()`, `tokenize()`, and `analyze-string()`. The parallel TAN-regex functions behave exactly like the standard XPath functions, but permit the escape character `\u{}`, which takes four types of constructions.
 
 1. hexadecimal codepoints, e.g., `\u{3f-4a 1faa}`.
@@ -29,3 +31,5 @@ See the subdirectory `tests` for examples and
 TAN-regex has been developed in service to the Text Alignment Network ([http://textalign.net](http://textalign.net)), but can be used independent of TAN. It is fully encapsulated in functions, so can be incorporated by any XSLT stylesheet via `<include>` or `<import>`.
 
 For more on TAN-regex see Joel Kalvesmaki, “A New \u: Extending XPath Regular Expressions for Unicode.” *Proceedings of Balisage: The Markup Conference 2020. Balisage Series on Markup Technologies*, vol. 25 (2020). [https://doi.org/10.4242/BalisageVol25.Kalvesmaki01](https://doi.org/10.4242/BalisageVol25.Kalvesmaki01).
+
+I thank the following individuals for suggestions that significantly improved TAN-regex: C. M. Sperberg-McQueen, David Birnbaum.
