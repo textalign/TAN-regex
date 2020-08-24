@@ -17,14 +17,15 @@ Other useful functions:
 * `rgx:string-to-components()`. Takes each character in an input string and returns a concatenation of its decomposed components.
 * `rgx:string-to-composites()`. Takes each character in an input string and returns a concatenation of characters that can decompose to that character.
 * `rgx:string-base()`. Changes in an input string any characters that can decompose to a single base character.
+* Key `get-chars-by-name`, e.g., `key('get-chars-by-name', ('parenthesis'), $default-ucd-names-db)`. Returns a tree fragment with Unicode characters with matching words in their names.
 * `rgx:hex-to-dec()`. Converts hexadecimal numbers to decimal.
 * `rgx:dec-to-hex()`. Converts decimal numbers to hexadecimal.
 * `rgx:n-to-dec()`. Converts base-n systems (2 through 16, 64) to decimals.
 * `rgx:dec-to-n()`. Converts decimals to any base-n system (as above). 
 
 See the subdirectory `tests` for examples and 
-[the XSLT function library](regex-ext-tan-functions.xsl) for entire list of functions, with documentation. 
+[the XSLT function library](TAN-regex.xsl) for all the functions, with documentation. 
 
 TAN-regex has been developed in service to the Text Alignment Network ([http://textalign.net](http://textalign.net)), but can be used independent of TAN. It is fully encapsulated in functions, so can be incorporated by any XSLT stylesheet via `<include>` or `<import>`.
 
-For more on TAN-regex see Joel Kalvesmaki, “A New \u: Extending XSLT Regular Expressions for Unicode.” *Proceedings of Balisage: The Markup Conference 2020. Balisage Series on Markup Technologies*, vol. 25 (2020). [https://doi.org/10.4242/BalisageVol25.Kalvesmaki01](https://doi.org/10.4242/BalisageVol25.Kalvesmaki01).
+For more on TAN-regex see Joel Kalvesmaki, “A New \u: Extending XPath Regular Expressions for Unicode.” *Proceedings of Balisage: The Markup Conference 2020. Balisage Series on Markup Technologies*, vol. 25 (2020). [https://doi.org/10.4242/BalisageVol25.Kalvesmaki01](https://doi.org/10.4242/BalisageVol25.Kalvesmaki01).
