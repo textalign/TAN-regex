@@ -4,7 +4,7 @@
     <!-- CATALYZING INPUT: any XML document, including this one -->
     <!-- MAIN INPUT: the global variables in this stylesheet -->
     <!-- MAIN OUTPUT: an analysis of the global variables, passed through the special regular expressions -->
-    <xsl:import href="../regex-ext-tan-functions.xsl"/>
+    <xsl:import href="../TAN-regex.xsl"/>
     <xsl:output indent="yes"/>
     
     <!--<xsl:param name="default-version" select="5.1"/>-->
@@ -129,6 +129,23 @@
             </xsl:non-matching-substring>
         </xsl:analyze-string>
     </xsl:variable>
+    <xsl:variable name="second-accent-dropped-from-greek-faster" as="xs:string*">
+        <xsl:analyze-string select="$greek-words-with-two-accents"
+            regex="({$greek-pattern-for-accented-vowels}\S*)({$greek-pattern-for-acute-vowels})">
+            <xsl:matching-substring>
+                <xsl:variable name="regex-2-parts" select="normalize-unicode(regex-group(2), 'NFKD')"/>
+                <xsl:variable name="regex-2-parts-no-acute" select="replace($regex-2-parts, '&#x301;', '')"/>
+                <xsl:value-of select="regex-group(1)"/>
+                <xsl:value-of select="normalize-unicode($regex-2-parts-no-acute)"/>
+            </xsl:matching-substring>
+            <xsl:non-matching-substring>
+                <xsl:value-of select="."/>
+            </xsl:non-matching-substring>
+        </xsl:analyze-string>
+    </xsl:variable>
+    
+    <xsl:variable name="upwards-arrows" as="xs:string" select="'↑↥'"/>
+    <xsl:variable name="downwards-arrows" as="xs:string" select="rgx:replace-by-char-name($upwards-arrows, 'upwards', 'downwards', (), true())"/>
     
 
     <xsl:variable name="raw-output" as="element()">
@@ -224,10 +241,18 @@
                 <greek-word-with-two-accents>
                     <xsl:value-of select="$greek-words-with-two-accents"/>
                 </greek-word-with-two-accents>
-                <second-accent-dropped-from-greek>
+                <!--<second-accent-dropped-from-greek>
+                    <!-\- This test takes 148 seconds, so is commented out. -\->
                     <xsl:value-of select="string-join($second-accent-dropped-from-greek)"/>
-                </second-accent-dropped-from-greek>
+                </second-accent-dropped-from-greek>-->
+                <second-accent-dropped-from-greek-faster>
+                    <xsl:value-of select="string-join($second-accent-dropped-from-greek-faster)"/>
+                </second-accent-dropped-from-greek-faster>
             </greek-word-replacement>
+            <arrows>
+                <upwards-arrows><xsl:value-of select="$upwards-arrows"/></upwards-arrows>
+                <downwards-arrows><xsl:value-of select="$downwards-arrows"/></downwards-arrows>
+            </arrows>
         </regex-analysis>
     </xsl:variable>
 

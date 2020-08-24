@@ -88,6 +88,10 @@
       <greek-pattern-for-accented-vowels length="191">[̈́΄΅ΆΈΉΊΌΎΏΐάέήίΰόύώἄἅἌἍἔἕἜἝἤἥἬἭἴἵἼἽὄὅὌὍὔὕὝὤὥὬὭάέήίόύώᾄᾅᾌᾍᾔᾕᾜᾝᾤᾥᾬᾭᾴΆῄΈΉ῎ΐΊ῞ΰΎ΅ῴΌΏ´ἂἃἊἋἒἓἚἛἢἣἪἫἲἳἺἻὂὃὊὋὒὓὛὢὣὪὫὰὲὴὶὸὺὼᾂᾃᾊᾋᾒᾓᾚᾛᾢᾣᾪᾫᾲᾺῂῈῊ῍ῒῚ῝ῢῪ῭`ῲῸῺ͂ἆἇἎἏἦἧἮἯἶἷἾἿὖὗὟὦὧὮὯᾆᾇᾎᾏᾖᾗᾞᾟᾦᾧᾮᾯᾶᾷ῀῁ῆῇ῏ῖῗ῟ῦῧῶῷ]</greek-pattern-for-accented-vowels>
       <greek-pattern-for-acute-vowels length="83">[̈́΄΅ΆΈΉΊΌΎΏΐάέήίΰόύώἄἅἌἍἔἕἜἝἤἥἬἭἴἵἼἽὄὅὌὍὔὕὝὤὥὬὭάέήίόύώᾄᾅᾌᾍᾔᾕᾜᾝᾤᾥᾬᾭᾴΆῄΈΉ῎ΐΊ῞ΰΎ΅ῴΌΏ´]</greek-pattern-for-acute-vowels>
       <greek-word-with-two-accents length="14">σῶσόν σῶσόν ᾊᾴ</greek-word-with-two-accents>
-      <second-accent-dropped-from-greek length="14">σῶσον σῶσον ᾊᾳ</second-accent-dropped-from-greek>
+      <second-accent-dropped-from-greek-faster length="14">σῶσον σῶσον ᾊᾳ</second-accent-dropped-from-greek-faster>
    </greek-word-replacement>
+   <arrows>
+      <upwards-arrows length="2">↑↥</upwards-arrows>
+      <downwards-arrows length="2">↓↧</downwards-arrows>
+   </arrows>
 </regex-analysis>

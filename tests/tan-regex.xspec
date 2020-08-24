@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8"?>
 <x:description xmlns:x="http://www.jenitennison.com/xslt/xspec" xmlns:err="http://www.w3.org/2005/xqt-errors"
     xmlns:rgx="tag:textalign.net,2015:ns" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    stylesheet="../regex-ext-tan-functions.xsl">
+    stylesheet="../TAN-regex.xsl">
     
     <x:variable name="text-with-bubbles" select="'🗪 U+1F5EA TWO SPEECH BUBBLES'"/>
     <x:variable name="pattern-for-bubbles" select="'\u{.bubbles}'"/>

@@ -433,7 +433,7 @@
     </xsl:function>
 
     <xsl:key name="get-chars-by-name" match="rgx:char" use="*/rgx:n"/>
-    <xsl:function name="rgx:get-chars-by-name" as="element()*">
+    <xsl:function name="rgx:get-chars-by-name" as="element()*" cache="yes">
         <!-- Input: two sets of strings -->
         <!-- Output: <char> elements from the Unicode database, the words of whose name (or alias) match all the first set and none of the second -->
         <xsl:param name="words-in-name" as="xs:string*"/>
@@ -558,7 +558,7 @@
         />
     </xsl:function>
 
-    <xsl:function name="rgx:replace-by-char-name" as="xs:string?">
+    <xsl:function name="rgx:replace-by-char-name" as="xs:string?" visibility="private">
         <!-- Input: a string to be changed; three sets of strings; a boolean -->
         <!-- Output: the string with characters replaced according to the rules below -->
         <!-- This function was written primarily to transform Greek letters, e.g., to change graves into acutes -->
