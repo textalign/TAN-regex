@@ -4,13 +4,14 @@
     xmlns:rgx="tag:textalign.net,2015:ns" xmlns:math="http://www.w3.org/2005/xpath-functions/math"
     exclude-result-prefixes="#all" version="3.0">
     
+    <xsl:param name="rgx:cache-functions-available" as="xs:boolean" static="yes" select="system-property('xsl:supports-higher-order-functions') eq 'yes'"/>
     <xsl:param name="default-unicode-version" as="xs:double" select="13.0"/>
     
     <xsl:variable name="TAN-regex-version" as="xs:double" select="1.0"/>
     
     <xsl:variable name="unicode-versions-supported" as="xs:double+"
         select="5.1, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0"/>
-    <xsl:function name="rgx:best-unicode-version" as="xs:double">
+    <xsl:function name="rgx:best-unicode-version" as="xs:double" visibility="public">
         <!-- Input: a double representing a Unicode version -->
         <!-- Output: the best version supported -->
         <xsl:param name="version" as="xs:double?"/>
@@ -50,7 +51,7 @@
     <!-- character used to signal the start of a string that should be reduced to the string base form -->
     <xsl:variable name="base-marker-regex" select="'-'"/>
     
-    <xsl:function name="rgx:escape" as="xs:string*">
+    <xsl:function name="rgx:escape" as="xs:string*" visibility="public">
         <!-- Input: any sequence of strings -->
         <!-- Output: each string prepared for regular expression searches, i.e., with reserved characters escaped out. -->
         <xsl:param name="strings" as="xs:string*"/>
@@ -62,7 +63,7 @@
         />
     </xsl:function>
     
-    <xsl:function name="rgx:parse-flags" as="element()">
+    <xsl:function name="rgx:parse-flags" as="element()" visibility="private">
         <!-- Input: a string corresponding to a $flags parameter in a regular expression function -->
         <!-- Output: an element that differentiates parts of the string between special TAN-regex flags and not -->
         <xsl:param name="flags" as="xs:string"/>
@@ -83,13 +84,13 @@
         </flags>
     </xsl:function>
 
-    <xsl:function name="rgx:matches" as="xs:boolean">
+    <xsl:function name="rgx:matches" as="xs:boolean" visibility="public">
         <!-- two-param function of the three-param version below -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:sequence select="rgx:matches($input, $pattern, '')"/>
     </xsl:function>
-    <xsl:function name="rgx:matches" as="xs:boolean">
+    <xsl:function name="rgx:matches" as="xs:boolean" visibility="public">
         <!-- Parallel to fn:matches(), but converts \u{} into classes. See rgx:regex() for details. -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
@@ -105,14 +106,14 @@
         <xsl:sequence select="matches($input, rgx:regex($pattern, ($version-picked, $default-unicode-version)[1]), $flags-norm)"/>
     </xsl:function>
     
-    <xsl:function name="rgx:replace" as="xs:string">
+    <xsl:function name="rgx:replace" as="xs:string" visibility="public">
         <!-- three-param function of the four-param version below -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="replacement" as="xs:string"/>
         <xsl:sequence select="rgx:replace($input, $pattern, $replacement, '')"/>
     </xsl:function>
-    <xsl:function name="rgx:replace" as="xs:string">
+    <xsl:function name="rgx:replace" as="xs:string" visibility="public">
         <!-- Parallel to fn:replace(), but converts \u{} into classes. See rgx:regex() for details. -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
@@ -129,13 +130,13 @@
         <xsl:sequence select="replace($input, rgx:regex($pattern, ($version-picked, $default-unicode-version)[1]), $replacement, $flags-norm)"/>
     </xsl:function>
     
-    <xsl:function name="rgx:tokenize" as="xs:string*">
+    <xsl:function name="rgx:tokenize" as="xs:string*" visibility="public">
         <!-- two-param function of the three-param version below -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:sequence select="rgx:tokenize($input, $pattern, '')"/>
     </xsl:function>
-    <xsl:function name="rgx:tokenize" as="xs:string*">
+    <xsl:function name="rgx:tokenize" as="xs:string*" visibility="public">
         <!-- Parallel to fn:tokenize(), but converts \u{} into classes. See rgx:regex() for details. -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
@@ -151,12 +152,12 @@
         <xsl:sequence select="tokenize($input, rgx:regex($pattern, ($version-picked, $default-unicode-version)[1]), $flags-norm)"/>
     </xsl:function>
     
-    <xsl:function name="rgx:analyze-string" as="element()">
+    <xsl:function name="rgx:analyze-string" as="element()" visibility="public">
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:sequence select="rgx:analyze-string($input, $pattern, '')"/>
     </xsl:function>
-    <xsl:function name="rgx:analyze-string" as="element()">
+    <xsl:function name="rgx:analyze-string" as="element()" visibility="public">
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="flags" as="xs:string"/>
@@ -175,11 +176,11 @@
     
     
     <xsl:variable name="default-ucd-decomp-db" select="rgx:get-ucd-decomp-db()"/>
-    <xsl:function name="rgx:get-ucd-decomp-db">
+    <xsl:function name="rgx:get-ucd-decomp-db" visibility="private">
         <!-- one-parameter version of fuller one below -->
         <xsl:sequence select="rgx:get-ucd-decomp-db($default-unicode-version)"/>
     </xsl:function>
-    <xsl:function name="rgx:get-ucd-decomp-db">
+    <xsl:function name="rgx:get-ucd-decomp-db" visibility="private">
         <!-- Input: a double specifying a Unicode version number -->
         <!-- Output: the document that contains the data for decomposing characters to and from 
             their parts -->
@@ -190,11 +191,11 @@
     </xsl:function>
     
     <xsl:variable name="default-ucd-decomp-simple-db" select="rgx:get-ucd-decomp-simple-db()"/>
-    <xsl:function name="rgx:get-ucd-decomp-simple-db">
+    <xsl:function name="rgx:get-ucd-decomp-simple-db" visibility="private">
         <!-- one-parameter version of fuller one below -->
         <xsl:sequence select="rgx:get-ucd-decomp-simple-db($default-unicode-version)"/>
     </xsl:function>
-    <xsl:function name="rgx:get-ucd-decomp-simple-db">
+    <xsl:function name="rgx:get-ucd-decomp-simple-db" visibility="private">
         <!-- Input: a double specifying a Unicode version number -->
         <!-- Output: the document that contains the data for translating characters to and from 
             their base characters -->
@@ -205,11 +206,11 @@
     </xsl:function>
     
     <xsl:variable name="default-ucd-names-db" select="rgx:get-ucd-names-db()"/>
-    <xsl:function name="rgx:get-ucd-names-db">
+    <xsl:function name="rgx:get-ucd-names-db" visibility="private">
         <!-- zero-parameter version of fuller one below -->
         <xsl:sequence select="rgx:get-ucd-names-db($default-unicode-version)"/>
     </xsl:function>
-    <xsl:function name="rgx:get-ucd-names-db">
+    <xsl:function name="rgx:get-ucd-names-db" visibility="private">
         <!-- Input: a double specifying a Unicode version number -->
         <!-- Output: the document that contains the data for Unicode character names -->
         <xsl:param name="version" as="xs:double"/>
@@ -219,12 +220,12 @@
     </xsl:function>
     
     
-    <xsl:function name="rgx:string-base" as="xs:string?">
+    <xsl:function name="rgx:string-base" as="xs:string?" visibility="public">
         <!-- one-param version of the fuller one, below -->
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:sequence select="rgx:string-base($arg, $default-unicode-version)"/>
     </xsl:function>
-    <xsl:function name="rgx:string-base" as="xs:string?">
+    <xsl:function name="rgx:string-base" as="xs:string?" visibility="public">
         <!-- This function takes any string and replaces every character with its base Unicode character.
       This function is useful to prepare a text to be searched without respect to accents.
       E.g., ἄνθρωπός - > ανθρωπος
@@ -252,12 +253,12 @@
         />
     </xsl:function>
     
-    <xsl:function name="rgx:string-to-components" as="xs:string*">
+    <xsl:function name="rgx:string-to-components" as="xs:string*" visibility="public">
         <!-- one-param version of the fuller one, below -->
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:sequence select="rgx:string-to-components($arg, $default-unicode-version)"/>
     </xsl:function>
-    <xsl:function name="rgx:string-to-components" as="xs:string*">
+    <xsl:function name="rgx:string-to-components" as="xs:string*" visibility="public">
         <!-- Input: any string; a Unicode version number. -->
         <!-- Output: one string per character in the input; if a character lends itself to decomposition, its component parts are 
         returned, otherwise the character itself is returned. -->
@@ -289,12 +290,12 @@
         </xsl:analyze-string>
     </xsl:function>
     
-    <xsl:function name="rgx:string-to-composites" as="xs:string*">
+    <xsl:function name="rgx:string-to-composites" as="xs:string*" visibility="public">
         <!-- one-parameter version of fuller one, below -->
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:sequence select="rgx:string-to-composites($arg, $default-unicode-version)"/>
     </xsl:function>
-    <xsl:function name="rgx:string-to-composites" as="xs:string*">
+    <xsl:function name="rgx:string-to-composites" as="xs:string*" visibility="public">
         <!-- Input: a string; a version of Unicode (double) -->
         <!-- Output: one string per character in the input; that string consists of the character itself 
             followed by all characters that use it as a base -->
@@ -321,12 +322,12 @@
         </xsl:analyze-string>
     </xsl:function>
 
-    <xsl:function name="rgx:codepoints-to-string" as="xs:string?">
+    <xsl:function name="rgx:codepoints-to-string" as="xs:string?" visibility="public">
         <!-- one-parameter function for the one below; default XML 1.0 -->
         <xsl:param name="arg" as="xs:integer*"/>
         <xsl:sequence select="rgx:codepoints-to-string($arg, true())"/>
     </xsl:function>
-    <xsl:function name="rgx:codepoints-to-string" as="xs:string?">
+    <xsl:function name="rgx:codepoints-to-string" as="xs:string?" visibility="public">
         <!-- Input: any number of integers -->
         <!-- Output: the string value representation, but only if the integers represent valid characters in XML -->
         <!-- Like fn:codepoints-to-string(), but filters out XML illegal characters -->
@@ -344,12 +345,12 @@
         </xsl:choose>
     </xsl:function>
 
-    <xsl:function name="rgx:process-regex-escape-u" as="xs:string?">
+    <xsl:function name="rgx:process-regex-escape-u" as="xs:string?" visibility="private">
         <!-- one-parameter version of fuller one, below -->
         <xsl:param name="val-inside-braces" as="xs:string"/>
         <xsl:sequence select="rgx:process-regex-escape-u($val-inside-braces, $default-unicode-version)"/>
     </xsl:function>
-    <xsl:function name="rgx:process-regex-escape-u" as="xs:string?">
+    <xsl:function name="rgx:process-regex-escape-u" as="xs:string?" visibility="private">
         <!-- Input: a string that is inside the braces of a \u{} expression -->
         <!-- Output: the expansion of the expression -->
         <!-- Acceptable contents of \u{}: -->
@@ -377,7 +378,7 @@
                         <!-- it's a Unicode codepoint -->
                         <xsl:analyze-string select="." regex="[0-9a-fA-F]+">
                             <xsl:matching-substring>
-                                <xsl:sequence select="rgx:codepoints-to-string(rgx:hex-to-dec(.))"/>
+                                <xsl:sequence select="rgx:codepoints-to-string(rgx:hex-to-dec-rgx(.))"/>
                             </xsl:matching-substring>
                             <xsl:non-matching-substring>
                                 <!-- keep the hyphen -->
@@ -435,7 +436,7 @@
     </xsl:function>
 
     <xsl:key name="get-chars-by-name" match="rgx:char" use="*/rgx:n"/>
-    <xsl:function name="rgx:get-chars-by-name" as="element()*" cache="yes">
+    <xsl:function name="rgx:get-chars-by-name" visibility="private" _cache="{$rgx:cache-functions-available}">
         <!-- Input: two sets of strings -->
         <!-- Output: <char> elements from the Unicode database, the words of whose name (or alias) match all the first set and none of the second -->
         <xsl:param name="words-in-name" as="xs:string*"/>
@@ -468,7 +469,7 @@
         />
     </xsl:function>
     
-    <xsl:function name="rgx:build-char-replacement-guide" as="element()">
+    <xsl:function name="rgx:build-char-replacement-guide" as="element()" visibility="private">
         <!-- Input: three sequences of strings; a boolean (whether matches should be strict); a double (Unicode version) -->
         <!-- Output: an XML tree rgx:replace/rgx:char/rgx:with specifying that every rgx:char/@val should be replaced
             by a string-joining of its rgx:with/@val. -->
@@ -533,7 +534,7 @@
         </replace>
     </xsl:function>
 
-    <xsl:function name="rgx:replace-by-char-name" as="xs:string?">
+    <xsl:function name="rgx:replace-by-char-name" as="xs:string?" visibility="public">
         <!-- five-parameter version of the full function, below -->
         <xsl:param name="string-to-replace" as="xs:string?"/>
         <xsl:param name="words-in-name-to-drop" as="xs:string*"/>
@@ -544,8 +545,8 @@
             select="rgx:replace-by-char-name($string-to-replace, $words-in-name-to-drop, $words-in-replacement-char-name, $words-not-in-replacement-char-name, $search-is-strict, $default-unicode-version)"
         />
     </xsl:function>
-    <xsl:function name="rgx:replace-by-char-name" as="xs:string?">
-        <!-- five-parameter version of the full function, below -->
+    <xsl:function name="rgx:replace-by-char-name" as="xs:string?" visibility="public">
+        <!-- six-parameter version of the full function, below -->
         <xsl:param name="string-to-replace" as="xs:string?"/>
         <xsl:param name="words-in-name-to-drop" as="xs:string*"/>
         <xsl:param name="words-in-replacement-char-name" as="xs:string*"/>
@@ -596,13 +597,13 @@
         <xsl:sequence select="string-join($output)"/>
     </xsl:function>
 
-    <xsl:function name="rgx:regex" as="xs:string?">
+    <xsl:function name="rgx:regex" as="xs:string?" visibility="private">
         <!-- one-parameter version of the longer one, below -->
         <xsl:param name="regex" as="xs:string?"/>
         <xsl:sequence select="rgx:regex($regex, $default-unicode-version)"/>
     </xsl:function>
 
-    <xsl:function name="rgx:regex" as="xs:string?" cache="yes">
+    <xsl:function name="rgx:regex" as="xs:string?" _cache="{$rgx:cache-functions-available}" visibility="private">
         <!-- Input: string representing a regex pattern -->
         <!-- Output: the regular expression adjusted according to TAN-regex rules -->
         <xsl:param name="regex" as="xs:string?"/>
@@ -617,7 +618,7 @@
         </xsl:choose>
     </xsl:function>
     
-    <xsl:function name="rgx:parse-regex" as="element()" cache="yes">
+    <xsl:function name="rgx:parse-regex" as="element()" _cache="{$rgx:cache-functions-available}" visibility="private">
         <!-- Input: a regular expression -->
         <!-- Output: an element with the regular expression parsed -->
         <!-- Any errors are embedded as <error>s -->
@@ -750,73 +751,23 @@
         <xsl:sequence select="$results"/>
     </xsl:function>
     
-    <xsl:function name="rgx:regex-is-valid" as="xs:boolean">
+    <xsl:function name="rgx:regex-is-valid" as="xs:boolean" visibility="public">
         <!-- Input: a string -->
         <!-- Output: true if the string is a valid regular expression, false otherwise -->
         <xsl:param name="input-regex" as="xs:string?"/>
-        <xsl:try select="rgx:matches('A', 'A|' || $input-regex)">
+        <xsl:try select="exists($input-regex) and rgx:matches('A', 'A|' || $input-regex)">
             <xsl:catch>
                 <xsl:value-of select="false()"/>
             </xsl:catch>
         </xsl:try>
     </xsl:function>
     
-
-    <xsl:variable name="hex-key" as="xs:string+"
-        select="('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')"/>
-    <xsl:variable name="base64-key" as="xs:string+"
-        select="('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '\')"/>
-
-    <xsl:function name="rgx:dec-to-hex" as="xs:string?">
-        <!-- Input: xs:integer -->
-        <!-- Output: the hexadecimal equivalent as a string, e.g., 31 - > '1F' -->
-        <xsl:param name="in" as="xs:integer?"/>
-        <xsl:sequence select="rgx:dec-to-n($in, 16)"/>
-    </xsl:function>
-
-    <xsl:function name="rgx:dec-to-n" as="xs:string?">
-        <!-- Input: two integers -->
-        <!-- Output: a string that represents the first numeral in base N, where N is the second numeral -->
-        <xsl:param name="in" as="xs:integer?"/>
-        <xsl:param name="base" as="xs:integer"/>
-        <xsl:variable name="in-abs" select="abs($in)"/>
-        <xsl:variable name="this-key"
-            select="
-                if ($base eq 64) then
-                    $base64-key
-                else
-                    $hex-key"
-        />
-        <xsl:choose>
-            <xsl:when test="$base lt 2">
-                <xsl:message select="'base ' || xs:string($base) || ' is impossible.'"/>
-            </xsl:when>
-            <xsl:when test="$base le 16 or $base eq 64">
-                <xsl:sequence
-                    select="
-                        (if ($in lt 0) then
-                            '-'
-                        else
-                            '') ||
-                        (if ($in-abs lt $base)
-                        then
-                            string($in-abs)
-                        else
-                            (rgx:dec-to-n($in-abs idiv $base, $base) || $this-key[($in-abs mod $base) + 1]))"
-                />
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:message
-                    select="'rgx:dec-to-n() does not support base N systems where N is greater than 16 (hexadecimal)'"
-                />
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
-
-    <xsl:function name="rgx:hex-to-dec" as="xs:integer?">
+    <xsl:function name="rgx:hex-to-dec-rgx" as="xs:integer?" visibility="private">
         <!-- Input: a string representing a hexadecimal number -->
         <!-- Output: the integer value, e.g., '1F' - > 31 -->
         <xsl:param name="hex" as="xs:string?"/>
+        <xsl:variable name="hex-key" as="xs:string+"
+            select="('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')"/>
         <xsl:variable name="split" as="xs:integer*">
             <xsl:analyze-string select="$hex" regex="[0-9a-fA-F]">
                 <xsl:matching-substring>
@@ -832,61 +783,6 @@
                     $split-rev[$i]
                     * (xs:integer(math:pow(16, $i - 1))))"
         />
-    </xsl:function>
-
-    <xsl:function name="rgx:n-to-dec" as="xs:integer?">
-        <!-- Input: string representation of some number; an integer -->
-        <!-- Output: an integer representing the first parameter in the base system of the 2nd parameter -->
-        <xsl:param name="input" as="xs:string?"/>
-        <xsl:param name="base-n" as="xs:integer"/>
-        <xsl:variable name="this-key" as="xs:string*">
-            <xsl:choose>
-                <xsl:when test="$base-n le 16">
-                    <xsl:sequence select="$hex-key"/>
-                </xsl:when>
-                <xsl:when test="$base-n = 64">
-                    <xsl:sequence select="$base64-key"/>
-                </xsl:when>
-            </xsl:choose>
-        </xsl:variable>
-        <xsl:variable name="input-normalized"
-            select="
-                if ($base-n le 16) then
-                    upper-case($input)
-                else
-                    $input"/>
-        <xsl:variable name="digit-sequence" as="xs:integer*">
-            <xsl:analyze-string select="$input-normalized" regex=".">
-                <xsl:matching-substring>
-                    <xsl:copy-of select="index-of($this-key, .) - 1"/>
-                </xsl:matching-substring>
-            </xsl:analyze-string>
-        </xsl:variable>
-        <xsl:variable name="split-rev" select="reverse($digit-sequence)"/>
-        <xsl:variable name="diagnostics-on" select="false()"/>
-        <xsl:if test="$diagnostics-on">
-            <xsl:message select="'diagnostics on for rgx:n-to-dec()'"/>
-            <xsl:message select="'input normalized: ', $input-normalized"/>
-            <xsl:message select="'input is what base: ', $base-n"/>
-            <xsl:message select="'this key: ', $this-key"/>
-            <xsl:message select="'digit sequence: ', $digit-sequence"/>
-        </xsl:if>
-        <xsl:choose>
-            <xsl:when test="exists($this-key)">
-                <xsl:copy-of
-                    select="
-                        sum(for $i in (1 to count($digit-sequence))
-                        return
-                            $split-rev[$i]
-                            * (xs:integer(math:pow($base-n, $i - 1))))"
-                />
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:message
-                    select="'rgx:n-to-dec() supports systems whose base values are hexadecimal or less, or base64'"
-                />
-            </xsl:otherwise>
-        </xsl:choose>
     </xsl:function>
 
 </xsl:stylesheet>
