@@ -14,6 +14,7 @@
     <xsl:function name="rgx:best-unicode-version" as="xs:double" visibility="public">
         <!-- Input: a double representing a Unicode version -->
         <!-- Output: the best version supported -->
+        <!--kw: regular expressions -->
         <xsl:param name="version" as="xs:double?"/>
         <xsl:choose>
             <xsl:when test="$version = $unicode-versions-supported">
@@ -54,6 +55,7 @@
     <xsl:function name="rgx:escape" as="xs:string*" visibility="public">
         <!-- Input: any sequence of strings -->
         <!-- Output: each string prepared for regular expression searches, i.e., with reserved characters escaped out. -->
+        <!--kw: regular expressions, strings -->
         <xsl:param name="strings" as="xs:string*"/>
         <xsl:sequence
             select="
@@ -92,6 +94,10 @@
     </xsl:function>
     <xsl:function name="rgx:matches" as="xs:boolean" visibility="public">
         <!-- Parallel to fn:matches(), but converts \u{} into classes. See rgx:regex() for details. -->
+        <!--Input: three strings -->
+        <!--Output: true if the first string matches the regular expression supplied as the second, taking
+            account into flags supplied by the third. -->
+        <!--kw: regular expressions, strings -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="flags" as="xs:string"/>
@@ -115,6 +121,11 @@
     </xsl:function>
     <xsl:function name="rgx:replace" as="xs:string" visibility="public">
         <!-- Parallel to fn:replace(), but converts \u{} into classes. See rgx:regex() for details. -->
+        <!--Input: four strings -->
+        <!--Output: the xs:string that is obtained by replacing each non-overlapping substring of the first
+            parameter given pattern declared by the second with an occurrence of the third, taking into account
+            flags supplied by the fourth. -->
+        <!--kw: regular expressions, strings -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="replacement" as="xs:string"/>
@@ -138,6 +149,11 @@
     </xsl:function>
     <xsl:function name="rgx:tokenize" as="xs:string*" visibility="public">
         <!-- Parallel to fn:tokenize(), but converts \u{} into classes. See rgx:regex() for details. -->
+        <!--Input: three strings -->
+        <!--Output: the first string cut into a sequence of strings, with any substring that matches the 
+            second parameter treated as a separator, not returned, taking account into flags supplied by 
+            the third. -->
+        <!--kw: regular expressions, strings -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="flags" as="xs:string"/>
@@ -153,11 +169,18 @@
     </xsl:function>
     
     <xsl:function name="rgx:analyze-string" as="element()" visibility="public">
+        <!-- two-parameter version of the fuller one, below -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:sequence select="rgx:analyze-string($input, $pattern, '')"/>
     </xsl:function>
     <xsl:function name="rgx:analyze-string" as="element()" visibility="public">
+        <!--Input: three strings -->
+        <!--Output: an XML structure that identifies which parts of the first parameter matched or 
+            failed to match the regular expression, supplied by the send parameter, taking into account 
+            flags supplied by the third. In the case of matched substrings, indicates substrings matched 
+            each capturing group in the regular expression. -->
+        <!--kw: regular expressions, strings -->
         <xsl:param name="input" as="xs:string?"/>
         <xsl:param name="pattern" as="xs:string"/>
         <xsl:param name="flags" as="xs:string"/>
@@ -226,6 +249,8 @@
         <xsl:sequence select="rgx:string-base($arg, $default-unicode-version)"/>
     </xsl:function>
     <xsl:function name="rgx:string-base" as="xs:string?" visibility="public">
+        <!--Input: a string and a double -->
+        <!--Output: the string, with each character reduced to its base character -->
         <!-- This function takes any string and replaces every character with its base Unicode character.
       This function is useful to prepare a text to be searched without respect to accents.
       E.g., ἄνθρωπός - > ανθρωπος
@@ -244,7 +269,7 @@
           If after non-base characters are removed there is not exactly one unique decomposed character left, the original input is retained.
         The above rules are already reflected in the contents of the simple decomposition database, so do not need to be 
         expressed in this function. For more, see ucd/ucd-decomp.xsl. -->
-
+        <!--kw: regular expressions, strings -->
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:param name="version" as="xs:double"/>
         <xsl:variable name="this-simple-decomp-db" select="rgx:get-ucd-decomp-simple-db($version)"/>
@@ -266,6 +291,7 @@
         <!-- If you wish to have more control over which components are returned (e.g., exclusion of combining marks), consider
         using either rgx:string-base() or the database directly: rgx:get-ucd-decomp-db(). The each rgx:char/rgx:b has @gc
         with the code for the component's general category -->
+        <!--kw: regular expressions, strings -->
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:param name="version" as="xs:double"/>
         <xsl:variable name="this-data-source"
@@ -303,6 +329,7 @@
          E.g., 'Max' - > 'MᴹḾṀṂℳⅯⓂ㎆㎒㎫㎹㎿㏁Ｍ𝐌𝑀𝑴𝓜𝔐𝕄𝕸𝖬𝗠𝘔𝙈𝙼🄼🅋🅪🅫aªàáâãäåāăąǎǟǡǻȁȃȧᵃḁẚạảấầẩẫậắằẳẵặₐ℀℁ⓐ㏂ａ𝐚𝑎𝒂𝒶𝓪𝔞𝕒𝖆𝖺𝗮𝘢𝙖𝚊xˣẋẍₓⅹⅺⅻⓧｘ𝐱𝑥𝒙𝓍𝔁𝔵𝕩𝖝𝗑𝘅𝘹𝙭𝚡'
          This is useful for preparing regex character classes to broaden a search. 
       -->
+        <!--kw: regular expressions, strings -->
         <xsl:param name="arg" as="xs:string?"/>
         <xsl:param name="version" as="xs:double"/>
         <xsl:variable name="this-data-source" as="document-node()"
@@ -323,7 +350,7 @@
     </xsl:function>
 
     <xsl:function name="rgx:codepoints-to-string" as="xs:string?" visibility="public">
-        <!-- one-parameter function for the one below; default XML 1.0 -->
+        <!-- one-parameter version of the fuller one below; default XML 1.0 -->
         <xsl:param name="arg" as="xs:integer*"/>
         <xsl:sequence select="rgx:codepoints-to-string($arg, true())"/>
     </xsl:function>
@@ -331,6 +358,7 @@
         <!-- Input: any number of integers -->
         <!-- Output: the string value representation, but only if the integers represent valid characters in XML -->
         <!-- Like fn:codepoints-to-string(), but filters out XML illegal characters -->
+        <!--kw: regular expressions, codepoints, strings -->
         <xsl:param name="arg" as="xs:integer*"/>
         <xsl:param name="xml-1-0" as="xs:boolean"/>
         <xsl:choose>
@@ -754,6 +782,7 @@
     <xsl:function name="rgx:regex-is-valid" as="xs:boolean" visibility="public">
         <!-- Input: a string -->
         <!-- Output: true if the string is a valid regular expression, false otherwise -->
+        <!-- kw: regular expressions -->
         <xsl:param name="input-regex" as="xs:string?"/>
         <xsl:try select="exists($input-regex) and rgx:matches('A', 'A|' || $input-regex)">
             <xsl:catch>
