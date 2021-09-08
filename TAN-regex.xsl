@@ -11,9 +11,9 @@
     
     <xsl:variable name="unicode-versions-supported" as="xs:double+"
         select="5.1, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0"/>
-    <xsl:function name="rgx:best-unicode-version" as="xs:double" visibility="public">
+    <xsl:function name="rgx:best-unicode-version" as="xs:double" visibility="private">
         <!-- Input: a double representing a Unicode version -->
-        <!-- Output: the best version supported -->
+        <!-- Output: the double, if that version supported, otherwise the nearest version -->
         <!--kw: regular expressions -->
         <xsl:param name="version" as="xs:double?"/>
         <xsl:choose>
